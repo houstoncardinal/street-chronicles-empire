@@ -159,9 +159,8 @@ function MissionPanel({ interactionId }: { interactionId: string }) {
 function RecruitPanel({ interactionId }: { interactionId: string }) {
   const { state, dispatch } = useGame();
 
-  const { cityInteractions, mountainInteractions } = require('@/data/interactions');
-  const allInteractions = [...cityInteractions, ...mountainInteractions];
-  const interaction = allInteractions.find((p: any) => p.id === interactionId);
+  const allInteractions = [...cityInteractionsData, ...mountainInteractionsData];
+  const interaction = allInteractions.find((p) => p.id === interactionId);
   const recruit = interaction?.crewId ? availableRecruits.find(r => r.id === interaction.crewId) : null;
 
   if (!recruit) return <p className="text-xs text-muted-foreground">No recruit found.</p>;
