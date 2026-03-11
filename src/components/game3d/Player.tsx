@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { RigidBody, CapsuleCollider } from '@react-three/rapier';
 import type { RapierRigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
-import { useGame } from '@/context/GameContext';
+import { GameState } from '@/types/game';
 import { cityInteractions, mountainInteractions } from '@/data/interactions';
 import { playerState } from '@/stores/playerStore';
 
@@ -12,10 +12,14 @@ const SPRINT_SPEED = 12;
 const JUMP_IMPULSE = 6;
 const INTERACTION_DISTANCE = 5;
 
-export function Player() {
+interface PlayerProps {
+  state: GameState;
+  dispatch: React.Dispatch<any>;
+}
+
+export function Player({ state, dispatch }: PlayerProps) {
   const rigidBody = useRef<RapierRigidBody>(null);
   const { camera } = useThree();
-  const { state, dispatch } = useGame();
 
   const keys = useRef<Record<string, boolean>>({});
   const yaw = useRef(0);

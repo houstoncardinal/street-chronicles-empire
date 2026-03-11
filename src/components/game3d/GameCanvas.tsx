@@ -9,7 +9,7 @@ import { CHARACTERS } from '@/data/characters';
 import { Suspense } from 'react';
 
 export function GameCanvas() {
-  const { state } = useGame();
+  const { state, dispatch } = useGame();
 
   return (
     <Canvas
@@ -20,7 +20,7 @@ export function GameCanvas() {
       <Suspense fallback={null}>
         <Physics key={state.currentRegion} gravity={[0, -20, 0]}>
           {state.currentRegion === 'city' ? <CityWorld /> : <MountainWorld />}
-          <Player />
+          <Player state={state} dispatch={dispatch} />
         </Physics>
 
         {/* Characters rendered outside physics (purely visual) */}
