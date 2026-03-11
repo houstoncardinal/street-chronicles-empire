@@ -23,6 +23,9 @@ const characterInteractions: InteractionPoint[] = CHARACTERS.map(char => ({
 export const cityInteractions: InteractionPoint[] = [
   { id: 'studio-1', type: 'studio', label: 'ENTER RECORDING STUDIO', position: [-30, 1.5, -25] },
   { id: 'club-1', type: 'club', label: 'ENTER THE CLUB', position: [35, 1.5, -35] },
+  { id: 'store-vehicles', type: 'store', label: 'NBA AUTO DEALERSHIP', position: [25, 1.5, -45], storeType: 'vehicles' },
+  { id: 'store-weapons', type: 'store', label: 'ARMORY', position: [-40, 1.5, 10], storeType: 'weapons' },
+  { id: 'store-music', type: 'store', label: 'YB MUSIC STORE', position: [-15, 1.5, -45], storeType: 'music' },
   { id: 'mission-m1', type: 'mission', label: 'MISSION: FIRST DROP', position: [15, 1.5, 18], missionId: 'm1' },
   { id: 'mission-m2', type: 'mission', label: 'MISSION: BLOCK PARTY', position: [-18, 1.5, 30], missionId: 'm2' },
   { id: 'mission-m3', type: 'mission', label: 'MISSION: HOLD THE LINE', position: [30, 1.5, 25], missionId: 'm3' },
