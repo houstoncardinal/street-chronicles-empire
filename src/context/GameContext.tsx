@@ -167,8 +167,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
 
     case 'BUY_VEHICLE': {
-      const { VEHICLES } = require('@/data/storeData');
-      const vehicle = VEHICLES.find((v: any) => v.id === action.vehicleId);
+      const vehicle = VEHICLES.find(v => v.id === action.vehicleId);
       if (!vehicle || state.money < vehicle.price || state.ownedVehicles.includes(action.vehicleId)) return state;
       return {
         ...state,
