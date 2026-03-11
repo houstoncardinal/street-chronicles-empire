@@ -55,6 +55,13 @@ export function Player({ state, dispatch }: PlayerProps) {
         } else if (interaction.type === 'cabin' || interaction.type === 'cave' || interaction.type === 'club') {
           dispatch({ type: 'SET_SHOW_PANEL', panel: interaction.type });
           document.exitPointerLock();
+        } else if (interaction.type === 'store') {
+          // Find store type from interaction data
+          const storeInteraction = [...(require('@/data/interactions').cityInteractions), ...(require('@/data/interactions').mountainInteractions)]
+            .find((p: any) => p.id === interaction.id);
+          const storeType = storeInteraction?.storeType || 'vehicles';
+          dispatch({ type: 'SET_SHOW_PANEL', panel: `store:${storeType}` });
+          document.exitPointerLock();
         }
       }
     };
