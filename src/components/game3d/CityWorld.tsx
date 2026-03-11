@@ -91,6 +91,11 @@ export function CityWorld() {
       {/* HQ Building */}
       <Headquarters />
 
+      {/* Store Buildings */}
+      <StoreBuilding position={[25, 0, -45]} label="AUTO" color="#00ff88" />
+      <StoreBuilding position={[-40, 0, 10]} label="ARMS" color="#FF4444" />
+      <StoreBuilding position={[-15, 0, -45]} label="MUSIC" color="#9b59b6" />
+
       {/* Buildings */}
       {buildings.map((b, i) => (
         <Building key={i} data={b} />
@@ -104,6 +109,9 @@ export function CityWorld() {
       <pointLight position={[35, 4, -35]} color="#F000B8" intensity={8} distance={15} />
       <pointLight position={[15, 3, 18]} color="#F000B8" intensity={5} distance={12} />
       <pointLight position={[-18, 3, 30]} color="#F000B8" intensity={5} distance={12} />
+      <pointLight position={[25, 5, -45]} color="#00ff88" intensity={6} distance={15} />
+      <pointLight position={[-40, 5, 10]} color="#FF4444" intensity={6} distance={15} />
+      <pointLight position={[-15, 5, -45]} color="#9b59b6" intensity={6} distance={15} />
 
       {/* Interaction markers */}
       {cityInteractions.map(point => (
