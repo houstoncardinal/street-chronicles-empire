@@ -180,8 +180,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, activeVehicle: action.vehicleId };
 
     case 'BUY_WEAPON': {
-      const { WEAPONS } = require('@/data/storeData');
-      const weapon = WEAPONS.find((w: any) => w.id === action.weaponId);
+      const weapon = WEAPONS.find(w => w.id === action.weaponId);
       if (!weapon || state.money < weapon.price || state.ownedWeapons.includes(action.weaponId)) return state;
       return {
         ...state,
