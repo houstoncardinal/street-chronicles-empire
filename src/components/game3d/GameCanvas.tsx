@@ -20,7 +20,7 @@ export function GameCanvas() {
       <Suspense fallback={null}>
         <Physics key={state.currentRegion} gravity={[0, -20, 0]}>
           {state.currentRegion === 'city' ? <CityWorld /> : <MountainWorld />}
-          <Player />
+          <Player state={state} dispatch={dispatch} />
         </Physics>
 
         {/* Characters rendered outside physics (purely visual) */}
