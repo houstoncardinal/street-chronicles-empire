@@ -101,12 +101,12 @@ export function StorePanel() {
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin" style={{ maxHeight: '65vh' }}>
-            {tab === 'vehicles' && <VehicleStore />}
-            {tab === 'weapons' && <WeaponStore />}
-            {tab === 'tools' && <ToolStore />}
-            {tab === 'music' && <MusicStore selectedAlbum={selectedAlbum} onSelectAlbum={setSelectedAlbum} />}
-            {tab === 'inventory' && <InventoryPanel />}
-            {tab === 'garage' && <GaragePanel selectedVehicle={selectedVehicle} onSelectVehicle={setSelectedVehicle} />}
+            {currentTab === 'vehicles' && <VehicleStore />}
+            {currentTab === 'weapons' && <WeaponStore />}
+            {currentTab === 'tools' && <ToolStore />}
+            {currentTab === 'music' && <MusicStore selectedAlbum={selectedAlbum} onSelectAlbum={setSelectedAlbum} />}
+            {currentTab === 'inventory' && <InventoryPanel />}
+            {currentTab === 'garage' && <GaragePanel selectedVehicle={selectedVehicle} onSelectVehicle={setSelectedVehicle} />}
           </div>
 
           <div className="text-[9px] text-muted-foreground mt-3 text-center">PRESS ESC TO CLOSE</div>
