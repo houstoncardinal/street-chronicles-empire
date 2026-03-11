@@ -89,7 +89,7 @@ export function StorePanel() {
                 key={t.id}
                 onClick={() => { setTab(t.id); setSelectedAlbum(null); setSelectedVehicle(null); }}
                 className={`flex items-center gap-2 px-3 py-2 text-[10px] font-display border transition-all ${
-                  tab === t.id
+                  currentTab === t.id
                     ? 'bg-primary/20 border-primary text-primary'
                     : 'bg-card/60 border-border text-muted-foreground hover:border-primary/30'
                 }`}
