@@ -56,10 +56,8 @@ export function Player({ state, dispatch }: PlayerProps) {
           dispatch({ type: 'SET_SHOW_PANEL', panel: interaction.type });
           document.exitPointerLock();
         } else if (interaction.type === 'store') {
-          // Find store type from interaction data
-          const storeInteraction = [...(require('@/data/interactions').cityInteractions), ...(require('@/data/interactions').mountainInteractions)]
-            .find((p: any) => p.id === interaction.id);
-          const storeType = storeInteraction?.storeType || 'vehicles';
+          // Extract store type from interaction id (store-vehicles, store-weapons, store-music)
+          const storeType = interaction.id.replace('store-', '');
           dispatch({ type: 'SET_SHOW_PANEL', panel: `store:${storeType}` });
           document.exitPointerLock();
         }
