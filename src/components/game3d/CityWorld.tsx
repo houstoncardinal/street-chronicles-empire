@@ -172,12 +172,38 @@ function StreetLights() {
   );
 }
 
+function StoreBuilding({ position, label, color }: { position: [number, number, number]; label: string; color: string }) {
+  return (
+    <RigidBody type="fixed" position={[position[0], 5, position[2]]}>
+      <mesh castShadow>
+        <boxGeometry args={[8, 10, 8]} />
+        <meshStandardMaterial color="#0a0a15" roughness={0.7} metalness={0.3} />
+      </mesh>
+      {/* Neon sign */}
+      <mesh position={[0, 3, 4.05]}>
+        <planeGeometry args={[6, 2]} />
+        <meshBasicMaterial color={color} transparent opacity={0.9} />
+      </mesh>
+      <mesh position={[0, 3, -4.05]} rotation={[0, Math.PI, 0]}>
+        <planeGeometry args={[6, 2]} />
+        <meshBasicMaterial color={color} transparent opacity={0.9} />
+      </mesh>
+      {/* Awning */}
+      <mesh position={[0, -4, 5]}>
+        <boxGeometry args={[9, 0.3, 2]} />
+        <meshStandardMaterial color={color} transparent opacity={0.4} />
+      </mesh>
+    </RigidBody>
+  );
+}
+
 function InteractionMarker({ position, type }: { position: [number, number, number]; type: string }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const color = type === 'travel' ? '#00ff88'
     : type === 'mission' ? '#F000B8'
     : type === 'recruit' ? '#ffaa00'
     : type === 'character' ? '#44ddff'
+    : type === 'store' ? '#9b59b6'
     : '#F000B8';
 
   useFrame((_, delta) => {
