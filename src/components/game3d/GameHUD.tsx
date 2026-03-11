@@ -110,12 +110,29 @@ export function GameHUD() {
       {/* Minimap */}
       <MiniMap />
 
-      {/* Bottom info */}
-      <div className="absolute bottom-4 left-4 text-[9px] text-muted-foreground">
-        CREW: {state.crew.length + Object.values(state.characterStates).filter(c => c.isRecruited).length} &nbsp;|&nbsp;
-        MISSIONS: {state.completedMissions} &nbsp;|&nbsp;
-        FOLLOWING: {followers.length}
+      {/* Bottom info with equipped items */}
+      <div className="absolute bottom-4 left-4 text-[9px] text-muted-foreground space-y-1">
+        <div>
+          CREW: {state.crew.length + Object.values(state.characterStates).filter(c => c.isRecruited).length} &nbsp;|&nbsp;
+          MISSIONS: {state.completedMissions} &nbsp;|&nbsp;
+          FOLLOWING: {followers.length}
+        </div>
+        {(state.activeVehicle || state.equippedWeapon || state.equippedTool) && (
+          <div className="flex gap-3">
+            {state.activeVehicle && <span className="text-accent">🚗 {VEHICLES.find(v => v.id === state.activeVehicle)?.name}</span>}
+            {state.equippedWeapon && <span className="text-destructive">🔫 {WEAPONS.find(w => w.id === state.equippedWeapon)?.name}</span>}
+            {state.equippedTool && <span className="text-primary">🔧 {TOOLS.find(t => t.id === state.equippedTool)?.name}</span>}
+          </div>
+        )}
       </div>
+
+      {/* Quick access keys */}
+      {isLocked && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 text-[8px] text-muted-foreground/40">
+          <span>[I] INVENTORY</span>
+          <span>[G] GARAGE</span>
+        </div>
+      )}
     </div>
   );
 }

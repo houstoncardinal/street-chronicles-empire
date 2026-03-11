@@ -55,10 +55,14 @@ export function Player({ state, dispatch }: PlayerProps) {
         } else if (interaction.type === 'cabin' || interaction.type === 'cave' || interaction.type === 'club') {
           dispatch({ type: 'SET_SHOW_PANEL', panel: interaction.type });
           document.exitPointerLock();
-        } else if (interaction.type === 'store') {
-          // Extract store type from interaction id (store-vehicles, store-weapons, store-music)
+      } else if (interaction.type === 'store') {
           const storeType = interaction.id.replace('store-', '');
-          dispatch({ type: 'SET_SHOW_PANEL', panel: `store:${storeType}` });
+          // garage and inventory open their own panels
+          if (storeType === 'garage' || storeType === 'inventory') {
+            dispatch({ type: 'SET_SHOW_PANEL', panel: storeType });
+          } else {
+            dispatch({ type: 'SET_SHOW_PANEL', panel: `store:${storeType}` });
+          }
           document.exitPointerLock();
         }
       }
