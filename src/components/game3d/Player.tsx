@@ -30,6 +30,18 @@ export function Player({ state, dispatch }: PlayerProps) {
     const onKeyDown = (e: KeyboardEvent) => {
       keys.current[e.code] = true;
 
+      // Quick access shortcuts
+      if (e.code === 'KeyI' && !state.showPanel) {
+        dispatch({ type: 'SET_SHOW_PANEL', panel: 'inventory' });
+        document.exitPointerLock();
+        return;
+      }
+      if (e.code === 'KeyG' && !state.showPanel) {
+        dispatch({ type: 'SET_SHOW_PANEL', panel: 'garage' });
+        document.exitPointerLock();
+        return;
+      }
+
       if (e.code === 'KeyE' && state.nearInteraction && !state.showPanel) {
         const interaction = state.nearInteraction;
 
