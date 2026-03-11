@@ -9,7 +9,7 @@ import { CHARACTERS } from '@/data/characters';
 import { Suspense } from 'react';
 
 export function GameCanvas() {
-  const { state } = useGame();
+  const { state, dispatch } = useGame();
 
   return (
     <Canvas
