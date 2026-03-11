@@ -50,6 +50,14 @@ export interface District {
   color: string;
 }
 
+export interface CharacterState {
+  relationship: number;
+  level: number;
+  xp: number;
+  isFollowing: boolean;
+  isRecruited: boolean;
+}
+
 export interface GameState {
   playerName: string;
   level: number;
@@ -69,6 +77,7 @@ export interface GameState {
   nearInteraction: { type: string; id: string; label: string } | null;
   showPanel: string | null;
   coldMeter: number;
+  characterStates: Record<string, CharacterState>;
 }
 
 export type GameSection = 'map' | 'missions' | 'crew' | 'studio' | 'reputation' | 'profile';

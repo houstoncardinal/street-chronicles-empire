@@ -13,7 +13,11 @@ type GameAction =
   | { type: 'SET_NEAR_INTERACTION'; interaction: { type: string; id: string; label: string } | null }
   | { type: 'SET_SHOW_PANEL'; panel: string | null }
   | { type: 'ADD_MONEY'; amount: number }
-  | { type: 'UPDATE_COLD'; delta: number };
+  | { type: 'UPDATE_COLD'; delta: number }
+  | { type: 'CHAT_WITH_CHARACTER'; characterId: string }
+  | { type: 'BOOST_RELATIONSHIP'; characterId: string; amount: number }
+  | { type: 'RECRUIT_CHARACTER'; characterId: string }
+  | { type: 'TOGGLE_CHARACTER_FOLLOW'; characterId: string };
 
 function unlockMissions(state: GameState): GameState {
   const missions = state.missions.map(m => ({
@@ -25,6 +29,18 @@ function unlockMissions(state: GameState): GameState {
     return { ...d, unlocked: d.unlocked || hasMission };
   });
   return { ...state, missions, districts };
+}
+
+function updateCharState(state: GameState, charId: string, update: Partial<GameState['characterStates'][string]>): GameState {
+  const current = state.characterStates[charId];
+  if (!current) return state;
+  return {
+    ...state,
+    characterStates: {
+      ...state.characterStates,
+      [charId]: { ...current, ...update },
+    },
+  };
 }
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -46,6 +62,43 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'UPDATE_COLD':
       return { ...state, coldMeter: Math.max(0, Math.min(100, state.coldMeter + action.delta)) };
+
+    case 'CHAT_WITH_CHARACTER': {
+      const cs = state.characterStates[action.characterId];
+      if (!cs) return state;
+      return updateCharState(state, action.characterId, {
+        relationship: Math.min(100, cs.relationship + 3),
+        xp: cs.xp + 5,
+      });
+    }
+
+    case 'BOOST_RELATIONSHIP': {
+      const cs = state.characterStates[action.characterId];
+      if (!cs) return state;
+      return updateCharState(state, action.characterId, {
+        relationship: Math.min(100, cs.relationship + action.amount),
+        xp: cs.xp + 10,
+        level: cs.xp + 10 >= cs.level * 50 ? cs.level + 1 : cs.level,
+      });
+    }
+
+    case 'RECRUIT_CHARACTER': {
+      if (state.money < 300) return state;
+      return {
+        ...updateCharState(state, action.characterId, { isRecruited: true }),
+        money: state.money - 300,
+        showPanel: null,
+      };
+    }
+
+    case 'TOGGLE_CHARACTER_FOLLOW': {
+      const cs = state.characterStates[action.characterId];
+      if (!cs || !cs.isRecruited) return state;
+      return {
+        ...updateCharState(state, action.characterId, { isFollowing: !cs.isFollowing }),
+        showPanel: null,
+      };
+    }
 
     case 'COMPLETE_MISSION': {
       const mission = state.missions.find(m => m.id === action.missionId);

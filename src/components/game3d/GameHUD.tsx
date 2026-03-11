@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { playerState } from '@/stores/playerStore';
 import { cityInteractions, mountainInteractions } from '@/data/interactions';
+import { CHARACTERS } from '@/data/characters';
 
 export function GameHUD() {
   const { state } = useGame();
@@ -13,9 +14,12 @@ export function GameHUD() {
     return () => document.removeEventListener('pointerlockchange', onChange);
   }, []);
 
+  // Get following companions
+  const followers = CHARACTERS.filter(c => state.characterStates[c.id]?.isFollowing);
+
   return (
     <div className="fixed inset-0 pointer-events-none z-10" style={{ fontFamily: "'Roboto Mono', monospace" }}>
-      {/* Click to play overlay */}
+      {/* Click to play */}
       {!isLocked && !state.showPanel && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 pointer-events-auto cursor-pointer">
           <div className="text-center">
@@ -26,6 +30,11 @@ export function GameHUD() {
               <p>SHIFT — SPRINT &nbsp;|&nbsp; SPACE — JUMP</p>
               <p>E — INTERACT &nbsp;|&nbsp; ESC — RELEASE</p>
             </div>
+            {followers.length > 0 && (
+              <div className="mt-4 text-[10px] text-primary">
+                {followers.map(f => f.name).join(', ')} following
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -37,7 +46,7 @@ export function GameHUD() {
         </div>
       )}
 
-      {/* Top HUD bar */}
+      {/* Top HUD */}
       <div className="absolute top-0 left-0 right-0 h-9 bg-card/80 border-b border-border flex items-center px-4 gap-5 text-[10px]">
         <span className="font-display text-xs text-primary glow-text-pink tracking-widest">NBA</span>
 
@@ -67,12 +76,25 @@ export function GameHUD() {
         </div>
       </div>
 
-      {/* Cold meter (mountain only) */}
+      {/* Companion indicator */}
+      {followers.length > 0 && isLocked && (
+        <div className="absolute top-12 left-4 space-y-1">
+          {followers.map(f => (
+            <div key={f.id} className="flex items-center gap-2 text-[9px]">
+              <div className="w-2 h-2" style={{ background: f.visual.accentColor }} />
+              <span className="text-foreground">{f.name}</span>
+              <span className="text-muted-foreground">— {f.title}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Cold meter */}
       {state.currentRegion === 'mountain' && (
         <div className="absolute top-12 right-4 flex items-center gap-2">
           <span className="text-[9px] text-muted-foreground">COLD</span>
           <div className="w-16 h-1 bg-secondary">
-            <div className="h-full bg-blue-400 transition-all duration-500" style={{ width: `${state.coldMeter}%` }} />
+            <div className="h-full transition-all duration-500" style={{ width: `${state.coldMeter}%`, background: 'hsl(210, 80%, 60%)' }} />
           </div>
         </div>
       )}
@@ -87,9 +109,11 @@ export function GameHUD() {
       {/* Minimap */}
       <MiniMap />
 
-      {/* Crew count */}
+      {/* Bottom info */}
       <div className="absolute bottom-4 left-4 text-[9px] text-muted-foreground">
-        CREW: {state.crew.length} &nbsp;|&nbsp; MISSIONS: {state.completedMissions}
+        CREW: {state.crew.length + Object.values(state.characterStates).filter(c => c.isRecruited).length} &nbsp;|&nbsp;
+        MISSIONS: {state.completedMissions} &nbsp;|&nbsp;
+        FOLLOWING: {followers.length}
       </div>
     </div>
   );
@@ -121,11 +145,8 @@ function MiniMap() {
       const size = 120;
       ctx.clearRect(0, 0, size, size);
 
-      // Background
       ctx.fillStyle = state.currentRegion === 'city' ? '#0a0a0a' : '#334';
       ctx.fillRect(0, 0, size, size);
-
-      // Border
       ctx.strokeStyle = '#333';
       ctx.lineWidth = 1;
       ctx.strokeRect(0, 0, size, size);
@@ -134,22 +155,42 @@ function MiniMap() {
       const cx = size / 2;
       const cy = size / 2;
 
-      // Interaction points
       const interactions = state.currentRegion === 'city' ? cityInteractions : mountainInteractions;
       interactions.forEach(p => {
         const px = cx + (p.position[0] - playerState.x) * scale;
         const pz = cy + (p.position[2] - playerState.z) * scale;
         if (px < 2 || px > size - 2 || pz < 2 || pz > size - 2) return;
 
-        ctx.fillStyle = p.type === 'travel' ? '#00ff88' : p.type === 'mission' ? '#F000B8' : '#ffaa00';
-        ctx.fillRect(px - 2, pz - 2, 4, 4);
+        ctx.fillStyle = p.type === 'travel' ? '#00ff88'
+          : p.type === 'mission' ? '#F000B8'
+          : p.type === 'character' ? '#44ddff'
+          : '#ffaa00';
+
+        if (p.type === 'character') {
+          // Diamond shape for characters
+          ctx.save();
+          ctx.translate(px, pz);
+          ctx.rotate(Math.PI / 4);
+          ctx.fillRect(-2.5, -2.5, 5, 5);
+          ctx.restore();
+        } else {
+          ctx.fillRect(px - 2, pz - 2, 4, 4);
+        }
+      });
+
+      // Following characters
+      const followers = CHARACTERS.filter(c => state.characterStates[c.id]?.isFollowing);
+      followers.forEach(f => {
+        ctx.fillStyle = f.visual.accentColor;
+        ctx.beginPath();
+        ctx.arc(cx + 3, cy + 3, 2, 0, Math.PI * 2);
+        ctx.fill();
       });
 
       // Player
       ctx.fillStyle = '#fff';
       ctx.fillRect(cx - 2, cy - 2, 4, 4);
 
-      // Direction indicator
       ctx.strokeStyle = '#F000B8';
       ctx.lineWidth = 1.5;
       ctx.beginPath();

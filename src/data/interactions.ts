@@ -1,11 +1,23 @@
 export interface InteractionPoint {
   id: string;
-  type: 'mission' | 'studio' | 'club' | 'recruit' | 'travel' | 'cabin' | 'cave' | 'stash';
+  type: 'mission' | 'studio' | 'club' | 'recruit' | 'travel' | 'cabin' | 'cave' | 'stash' | 'character';
   label: string;
   position: [number, number, number];
   missionId?: string;
   crewId?: string;
+  characterId?: string;
 }
+
+import { CHARACTERS } from '@/data/characters';
+
+// Generate character interaction points from character data
+const characterInteractions: InteractionPoint[] = CHARACTERS.map(char => ({
+  id: `char-${char.id}`,
+  type: 'character' as const,
+  label: `TALK TO ${char.name}`,
+  position: char.homePosition,
+  characterId: char.id,
+}));
 
 export const cityInteractions: InteractionPoint[] = [
   { id: 'studio-1', type: 'studio', label: 'ENTER RECORDING STUDIO', position: [-30, 1.5, -25] },
@@ -18,6 +30,7 @@ export const cityInteractions: InteractionPoint[] = [
   { id: 'recruit-c3', type: 'recruit', label: 'RECRUIT: BONES', position: [20, 1.5, -15], crewId: 'c3' },
   { id: 'recruit-c4', type: 'recruit', label: 'RECRUIT: REDD', position: [-20, 1.5, 15], crewId: 'c4' },
   { id: 'highway-exit', type: 'travel', label: 'HIGHWAY → GRAVEDIGGER MOUNTAIN', position: [0, 1.5, -65] },
+  ...characterInteractions,
 ];
 
 import { getTerrainHeight } from '@/utils/terrain';

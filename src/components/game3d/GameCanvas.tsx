@@ -3,7 +3,9 @@ import { Physics } from '@react-three/rapier';
 import { Player } from './Player';
 import { CityWorld } from './CityWorld';
 import { MountainWorld } from './MountainWorld';
+import { CharacterModel } from './CharacterModel';
 import { useGame } from '@/context/GameContext';
+import { CHARACTERS } from '@/data/characters';
 import { Suspense } from 'react';
 
 export function GameCanvas() {
@@ -20,6 +22,23 @@ export function GameCanvas() {
           {state.currentRegion === 'city' ? <CityWorld /> : <MountainWorld />}
           <Player />
         </Physics>
+
+        {/* Characters rendered outside physics (purely visual) */}
+        {CHARACTERS.map(char => {
+          const charState = state.characterStates[char.id];
+          if (!charState) return null;
+          // Show in city always, or in mountain only if following
+          if (state.currentRegion !== 'city' && !charState.isFollowing) return null;
+          return (
+            <CharacterModel
+              key={char.id}
+              character={char}
+              isFollowing={charState.isFollowing}
+              relationship={charState.relationship}
+              currentRegion={state.currentRegion}
+            />
+          );
+        })}
       </Suspense>
     </Canvas>
   );
