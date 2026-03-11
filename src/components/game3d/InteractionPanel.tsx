@@ -1,5 +1,6 @@
 import { useGame } from '@/context/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cityInteractions as cityInteractionsData, mountainInteractions as mountainInteractionsData } from '@/data/interactions';
 import { X, Zap, UserPlus, Music2, Disc3 } from 'lucide-react';
 
 const availableRecruits = [
