@@ -4,6 +4,7 @@ import { GameHUD } from '@/components/game3d/GameHUD';
 import { InteractionPanel } from '@/components/game3d/InteractionPanel';
 import { DialoguePanel } from '@/components/game3d/DialoguePanel';
 import { StorePanel } from '@/components/game3d/StorePanel';
+import { MusicPlayerWidget } from '@/components/game3d/MusicPlayerWidget';
 
 const Index = () => (
   <GameProvider>
@@ -13,6 +14,7 @@ const Index = () => (
       <InteractionPanel />
       <DialoguePanel />
       <StorePanel />
+      <MusicPlayerWidget />
     </div>
   </GameProvider>
 );

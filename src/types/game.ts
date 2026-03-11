@@ -59,25 +59,42 @@ export interface CharacterState {
 }
 
 // Store items
+export interface VehicleCustomization {
+  paintColor: string;
+  rims: string;
+  engine: string;
+  neon: boolean;
+}
+
 export interface VehicleItem {
   id: string;
   name: string;
-  type: 'car' | 'truck' | 'suv' | 'snow';
+  type: 'car' | 'truck' | 'suv' | 'snow' | 'motorcycle';
   price: number;
   speed: number;
   handling: number;
   description: string;
   color: string;
+  customization: VehicleCustomization;
 }
 
 export interface WeaponItem {
   id: string;
   name: string;
-  type: 'pistol' | 'rifle' | 'shotgun' | 'melee';
+  type: 'pistol' | 'rifle' | 'shotgun' | 'melee' | 'armor';
   price: number;
   damage: number;
   range: number;
   description: string;
+}
+
+export interface ToolItem {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  ability: string;
+  icon: string;
 }
 
 export interface MusicAlbum {
@@ -90,6 +107,14 @@ export interface MusicAlbum {
   fansBoost: number;
   fameBoost: number;
   owned: boolean;
+}
+
+export interface MusicPlayerState {
+  isPlaying: boolean;
+  currentAlbumId: string | null;
+  currentTrackIndex: number;
+  shuffle: boolean;
+  repeat: boolean;
 }
 
 export interface GameState {
@@ -116,8 +141,13 @@ export interface GameState {
   ownedVehicles: string[];
   ownedWeapons: string[];
   ownedMusic: string[];
+  ownedTools: string[];
   equippedWeapon: string | null;
   activeVehicle: string | null;
+  equippedTool: string | null;
+  vehicleCustomizations: Record<string, VehicleCustomization>;
+  // Music player
+  musicPlayer: MusicPlayerState;
 }
 
 export type GameSection = 'map' | 'missions' | 'crew' | 'studio' | 'reputation' | 'profile';

@@ -30,6 +30,18 @@ export function Player({ state, dispatch }: PlayerProps) {
     const onKeyDown = (e: KeyboardEvent) => {
       keys.current[e.code] = true;
 
+      // Quick access shortcuts
+      if (e.code === 'KeyI' && !state.showPanel) {
+        dispatch({ type: 'SET_SHOW_PANEL', panel: 'inventory' });
+        document.exitPointerLock();
+        return;
+      }
+      if (e.code === 'KeyG' && !state.showPanel) {
+        dispatch({ type: 'SET_SHOW_PANEL', panel: 'garage' });
+        document.exitPointerLock();
+        return;
+      }
+
       if (e.code === 'KeyE' && state.nearInteraction && !state.showPanel) {
         const interaction = state.nearInteraction;
 
@@ -55,10 +67,14 @@ export function Player({ state, dispatch }: PlayerProps) {
         } else if (interaction.type === 'cabin' || interaction.type === 'cave' || interaction.type === 'club') {
           dispatch({ type: 'SET_SHOW_PANEL', panel: interaction.type });
           document.exitPointerLock();
-        } else if (interaction.type === 'store') {
-          // Extract store type from interaction id (store-vehicles, store-weapons, store-music)
+      } else if (interaction.type === 'store') {
           const storeType = interaction.id.replace('store-', '');
-          dispatch({ type: 'SET_SHOW_PANEL', panel: `store:${storeType}` });
+          // garage and inventory open their own panels
+          if (storeType === 'garage' || storeType === 'inventory') {
+            dispatch({ type: 'SET_SHOW_PANEL', panel: storeType });
+          } else {
+            dispatch({ type: 'SET_SHOW_PANEL', panel: `store:${storeType}` });
+          }
           document.exitPointerLock();
         }
       }

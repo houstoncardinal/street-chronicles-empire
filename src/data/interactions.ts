@@ -11,7 +11,6 @@ export interface InteractionPoint {
 
 import { CHARACTERS } from '@/data/characters';
 
-// Generate character interaction points from character data
 const characterInteractions: InteractionPoint[] = CHARACTERS.map(char => ({
   id: `char-${char.id}`,
   type: 'character' as const,
@@ -23,9 +22,12 @@ const characterInteractions: InteractionPoint[] = CHARACTERS.map(char => ({
 export const cityInteractions: InteractionPoint[] = [
   { id: 'studio-1', type: 'studio', label: 'ENTER RECORDING STUDIO', position: [-30, 1.5, -25] },
   { id: 'club-1', type: 'club', label: 'ENTER THE CLUB', position: [35, 1.5, -35] },
-  { id: 'store-vehicles', type: 'store', label: 'NBA AUTO DEALERSHIP', position: [25, 1.5, -45], storeType: 'vehicles' },
-  { id: 'store-weapons', type: 'store', label: 'ARMORY', position: [-40, 1.5, 10], storeType: 'weapons' },
-  { id: 'store-music', type: 'store', label: 'YB MUSIC STORE', position: [-15, 1.5, -45], storeType: 'music' },
+  { id: 'store-vehicles', type: 'store', label: 'NBA AUTO DEALERSHIP', position: [25, 1.5, -40], storeType: 'vehicles' },
+  { id: 'store-weapons', type: 'store', label: 'ARMORY — WEAPONS & GEAR', position: [-40, 1.5, 15], storeType: 'weapons' },
+  { id: 'store-music', type: 'store', label: 'YB DIGITAL MUSIC STORE', position: [-15, 1.5, -40], storeType: 'music' },
+  { id: 'store-tools', type: 'store', label: 'GEAR & TOOLS SHOP', position: [40, 1.5, 35], storeType: 'tools' },
+  { id: 'store-garage', type: 'store', label: 'YOUR GARAGE', position: [10, 1.5, -30], storeType: 'garage' },
+  { id: 'store-inventory', type: 'store', label: 'INVENTORY', position: [-10, 1.5, 20], storeType: 'inventory' },
   { id: 'mission-m1', type: 'mission', label: 'MISSION: FIRST DROP', position: [15, 1.5, 18], missionId: 'm1' },
   { id: 'mission-m2', type: 'mission', label: 'MISSION: BLOCK PARTY', position: [-18, 1.5, 30], missionId: 'm2' },
   { id: 'mission-m3', type: 'mission', label: 'MISSION: HOLD THE LINE', position: [30, 1.5, 25], missionId: 'm3' },
