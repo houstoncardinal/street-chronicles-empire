@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { GameState, GameSection, CrewMember } from '@/types/game';
 import { loadGameState, saveGameState, initialGameState } from '@/data/gameData';
-import { MUSIC_CATALOG } from '@/data/storeData';
+import { MUSIC_CATALOG, VEHICLES, WEAPONS } from '@/data/storeData';
 
 type GameAction =
   | { type: 'SET_SECTION'; section: GameSection }
