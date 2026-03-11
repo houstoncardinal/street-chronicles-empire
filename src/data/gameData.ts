@@ -59,6 +59,11 @@ export const initialGameState: GameState = {
   completedMissions: 0,
   totalTerritories: 6,
   activeSection: 'map',
+  ownedVehicles: [],
+  ownedWeapons: [],
+  ownedMusic: [],
+  equippedWeapon: null,
+  activeVehicle: null,
 };
 
 const STORAGE_KEY = 'nba-game-state';

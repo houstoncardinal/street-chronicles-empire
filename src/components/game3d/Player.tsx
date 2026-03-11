@@ -55,6 +55,11 @@ export function Player({ state, dispatch }: PlayerProps) {
         } else if (interaction.type === 'cabin' || interaction.type === 'cave' || interaction.type === 'club') {
           dispatch({ type: 'SET_SHOW_PANEL', panel: interaction.type });
           document.exitPointerLock();
+        } else if (interaction.type === 'store') {
+          // Extract store type from interaction id (store-vehicles, store-weapons, store-music)
+          const storeType = interaction.id.replace('store-', '');
+          dispatch({ type: 'SET_SHOW_PANEL', panel: `store:${storeType}` });
+          document.exitPointerLock();
         }
       }
     };

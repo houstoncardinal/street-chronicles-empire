@@ -91,6 +91,11 @@ export function CityWorld() {
       {/* HQ Building */}
       <Headquarters />
 
+      {/* Store Buildings */}
+      <StoreBuilding position={[25, 0, -45]} label="AUTO" color="#00ff88" />
+      <StoreBuilding position={[-40, 0, 10]} label="ARMS" color="#FF4444" />
+      <StoreBuilding position={[-15, 0, -45]} label="MUSIC" color="#9b59b6" />
+
       {/* Buildings */}
       {buildings.map((b, i) => (
         <Building key={i} data={b} />
@@ -104,6 +109,9 @@ export function CityWorld() {
       <pointLight position={[35, 4, -35]} color="#F000B8" intensity={8} distance={15} />
       <pointLight position={[15, 3, 18]} color="#F000B8" intensity={5} distance={12} />
       <pointLight position={[-18, 3, 30]} color="#F000B8" intensity={5} distance={12} />
+      <pointLight position={[25, 5, -45]} color="#00ff88" intensity={6} distance={15} />
+      <pointLight position={[-40, 5, 10]} color="#FF4444" intensity={6} distance={15} />
+      <pointLight position={[-15, 5, -45]} color="#9b59b6" intensity={6} distance={15} />
 
       {/* Interaction markers */}
       {cityInteractions.map(point => (
@@ -164,12 +172,38 @@ function StreetLights() {
   );
 }
 
+function StoreBuilding({ position, label, color }: { position: [number, number, number]; label: string; color: string }) {
+  return (
+    <RigidBody type="fixed" position={[position[0], 5, position[2]]}>
+      <mesh castShadow>
+        <boxGeometry args={[8, 10, 8]} />
+        <meshStandardMaterial color="#0a0a15" roughness={0.7} metalness={0.3} />
+      </mesh>
+      {/* Neon sign */}
+      <mesh position={[0, 3, 4.05]}>
+        <planeGeometry args={[6, 2]} />
+        <meshBasicMaterial color={color} transparent opacity={0.9} />
+      </mesh>
+      <mesh position={[0, 3, -4.05]} rotation={[0, Math.PI, 0]}>
+        <planeGeometry args={[6, 2]} />
+        <meshBasicMaterial color={color} transparent opacity={0.9} />
+      </mesh>
+      {/* Awning */}
+      <mesh position={[0, -4, 5]}>
+        <boxGeometry args={[9, 0.3, 2]} />
+        <meshStandardMaterial color={color} transparent opacity={0.4} />
+      </mesh>
+    </RigidBody>
+  );
+}
+
 function InteractionMarker({ position, type }: { position: [number, number, number]; type: string }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const color = type === 'travel' ? '#00ff88'
     : type === 'mission' ? '#F000B8'
     : type === 'recruit' ? '#ffaa00'
     : type === 'character' ? '#44ddff'
+    : type === 'store' ? '#9b59b6'
     : '#F000B8';
 
   useFrame((_, delta) => {

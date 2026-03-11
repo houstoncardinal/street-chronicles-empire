@@ -58,6 +58,40 @@ export interface CharacterState {
   isRecruited: boolean;
 }
 
+// Store items
+export interface VehicleItem {
+  id: string;
+  name: string;
+  type: 'car' | 'truck' | 'suv' | 'snow';
+  price: number;
+  speed: number;
+  handling: number;
+  description: string;
+  color: string;
+}
+
+export interface WeaponItem {
+  id: string;
+  name: string;
+  type: 'pistol' | 'rifle' | 'shotgun' | 'melee';
+  price: number;
+  damage: number;
+  range: number;
+  description: string;
+}
+
+export interface MusicAlbum {
+  id: string;
+  title: string;
+  artist: string;
+  year: string;
+  tracks: string[];
+  price: number;
+  fansBoost: number;
+  fameBoost: number;
+  owned: boolean;
+}
+
 export interface GameState {
   playerName: string;
   level: number;
@@ -78,6 +112,12 @@ export interface GameState {
   showPanel: string | null;
   coldMeter: number;
   characterStates: Record<string, CharacterState>;
+  // Inventory
+  ownedVehicles: string[];
+  ownedWeapons: string[];
+  ownedMusic: string[];
+  equippedWeapon: string | null;
+  activeVehicle: string | null;
 }
 
 export type GameSection = 'map' | 'missions' | 'crew' | 'studio' | 'reputation' | 'profile';
