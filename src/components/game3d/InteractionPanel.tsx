@@ -104,9 +104,8 @@ function MissionPanel({ interactionId }: { interactionId: string }) {
   const { state, dispatch } = useGame();
 
   // Find the mission linked to this interaction
-  const { cityInteractions, mountainInteractions } = require('@/data/interactions');
-  const allInteractions = [...cityInteractions, ...mountainInteractions];
-  const interaction = allInteractions.find((p: any) => p.id === interactionId);
+  const allInteractions = [...cityInteractionsData, ...mountainInteractionsData];
+  const interaction = allInteractions.find((p) => p.id === interactionId);
   const mission = interaction?.missionId ? state.missions.find(m => m.id === interaction.missionId) : null;
 
   if (!mission) {
