@@ -33,7 +33,6 @@ export const initialGameState: GameState = {
     { id: 'm6', title: 'RIVAL MEETING', description: 'Confront the rival crew leader.', district: 'rival-territory', type: 'rival', difficulty: 4, rewards: { money: 1000, fans: 50, streetRep: 20, industryFame: 5, crewLoyalty: 15 }, requiredLevel: 4, completed: false, locked: true },
     { id: 'm7', title: 'CABIN SEARCH', description: 'Search the abandoned cabin on the mountain.', district: 'downtown', type: 'errand', difficulty: 3, rewards: { money: 800, fans: 30, streetRep: 8, industryFame: 10, crewLoyalty: 5 }, requiredLevel: 3, completed: false, locked: true },
     { id: 'm8', title: 'LUXURY MOVE', description: 'Make your play in Luxury Hills.', district: 'luxury-hills', type: 'errand', difficulty: 5, rewards: { money: 2000, fans: 500, streetRep: 10, industryFame: 30, crewLoyalty: 10 }, requiredLevel: 5, completed: false, locked: true },
-    // Character missions
     { id: 'm-yb', title: 'BUILD THE MOVEMENT', description: 'YB needs you to rally the city. Major territory takeover.', district: 'the-block', type: 'defend', difficulty: 1, rewards: { money: 500, fans: 100, streetRep: 15, industryFame: 10, crewLoyalty: 10 }, requiredLevel: 1, completed: false, locked: false },
     { id: 'm-ben', title: 'STRATEGIC OPERATION', description: 'Ben has a plan. Execute it with precision.', district: 'downtown', type: 'errand', difficulty: 1, rewards: { money: 400, fans: 50, streetRep: 10, industryFame: 5, crewLoyalty: 8 }, requiredLevel: 1, completed: false, locked: false },
     { id: 'm-rondo', title: 'HEADLINE SHOW', description: 'Rondo has a show tonight. Make it legendary.', district: 'club-district', type: 'perform', difficulty: 1, rewards: { money: 300, fans: 200, streetRep: 5, industryFame: 20, crewLoyalty: 5 }, requiredLevel: 1, completed: false, locked: false },
@@ -62,8 +61,18 @@ export const initialGameState: GameState = {
   ownedVehicles: [],
   ownedWeapons: [],
   ownedMusic: [],
+  ownedTools: [],
   equippedWeapon: null,
   activeVehicle: null,
+  equippedTool: null,
+  vehicleCustomizations: {},
+  musicPlayer: {
+    isPlaying: false,
+    currentAlbumId: null,
+    currentTrackIndex: 0,
+    shuffle: false,
+    repeat: false,
+  },
 };
 
 const STORAGE_KEY = 'nba-game-state';
@@ -77,6 +86,8 @@ export function loadGameState(): GameState {
         ...initialGameState,
         ...parsed,
         characterStates: { ...initialGameState.characterStates, ...(parsed.characterStates || {}) },
+        musicPlayer: { ...initialGameState.musicPlayer, ...(parsed.musicPlayer || {}), isPlaying: false },
+        vehicleCustomizations: { ...initialGameState.vehicleCustomizations, ...(parsed.vehicleCustomizations || {}) },
       };
     }
   } catch {}

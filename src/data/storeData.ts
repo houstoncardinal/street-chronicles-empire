@@ -1,14 +1,16 @@
-import { VehicleItem, WeaponItem, MusicAlbum } from '@/types/game';
+import { VehicleItem, WeaponItem, MusicAlbum, ToolItem } from '@/types/game';
 
 export const VEHICLES: VehicleItem[] = [
-  { id: 'v-hellcat', name: 'HELLCAT', type: 'car', price: 2000, speed: 95, handling: 70, description: 'Supercharged muscle. King of the streets.', color: '#1a1a2e' },
-  { id: 'v-trackhawk', name: 'TRACKHAWK', type: 'suv', price: 3500, speed: 88, handling: 75, description: 'Luxury meets raw power. SUV dominance.', color: '#2d2d44' },
-  { id: 'v-g-wagon', name: 'G-WAGON', type: 'suv', price: 5000, speed: 72, handling: 80, description: 'Ultimate status symbol. Built for the boss.', color: '#0f0f0f' },
-  { id: 'v-raptor', name: 'RAPTOR', type: 'truck', price: 4000, speed: 78, handling: 85, description: 'Off-road beast. Eats mountains for breakfast.', color: '#1e3a1e' },
-  { id: 'v-snowrunner', name: 'SNOWRUNNER', type: 'snow', price: 3000, speed: 60, handling: 90, description: 'Built for GraveDigger Mountain. Snow chains included.', color: '#2a3a5c' },
-  { id: 'v-wraith', name: 'WRAITH', type: 'car', price: 8000, speed: 98, handling: 65, description: 'Ghost mode. Silent and lethal on the streets.', color: '#1a0a2e' },
-  { id: 'v-reaper', name: 'REAPER', type: 'car', price: 6000, speed: 92, handling: 72, description: 'Custom built. No one outruns the reaper.', color: '#2e0a0a' },
-  { id: 'v-sherpa', name: 'SHERPA 4x4', type: 'truck', price: 4500, speed: 65, handling: 92, description: 'Mountain expedition vehicle. Goes where roads end.', color: '#3a3a2a' },
+  { id: 'v-hellcat', name: 'HELLCAT', type: 'car', price: 2000, speed: 95, handling: 70, description: 'Supercharged muscle. King of the streets.', color: '#1a1a2e', customization: { paintColor: '#1a1a2e', rims: 'stock', engine: 'stock', neon: false } },
+  { id: 'v-trackhawk', name: 'TRACKHAWK', type: 'suv', price: 3500, speed: 88, handling: 75, description: 'Luxury meets raw power. SUV dominance.', color: '#2d2d44', customization: { paintColor: '#2d2d44', rims: 'stock', engine: 'stock', neon: false } },
+  { id: 'v-g-wagon', name: 'G-WAGON', type: 'suv', price: 5000, speed: 72, handling: 80, description: 'Ultimate status symbol. Built for the boss.', color: '#0f0f0f', customization: { paintColor: '#0f0f0f', rims: 'stock', engine: 'stock', neon: false } },
+  { id: 'v-raptor', name: 'RAPTOR', type: 'truck', price: 4000, speed: 78, handling: 85, description: 'Off-road beast. Eats mountains for breakfast.', color: '#1e3a1e', customization: { paintColor: '#1e3a1e', rims: 'stock', engine: 'stock', neon: false } },
+  { id: 'v-snowrunner', name: 'SNOWRUNNER', type: 'snow', price: 3000, speed: 60, handling: 90, description: 'Built for GraveDigger Mountain. Snow chains included.', color: '#2a3a5c', customization: { paintColor: '#2a3a5c', rims: 'stock', engine: 'stock', neon: false } },
+  { id: 'v-wraith', name: 'WRAITH', type: 'car', price: 8000, speed: 98, handling: 65, description: 'Ghost mode. Silent and lethal on the streets.', color: '#1a0a2e', customization: { paintColor: '#1a0a2e', rims: 'stock', engine: 'stock', neon: false } },
+  { id: 'v-reaper', name: 'REAPER', type: 'car', price: 6000, speed: 92, handling: 72, description: 'Custom built. No one outruns the reaper.', color: '#2e0a0a', customization: { paintColor: '#2e0a0a', rims: 'stock', engine: 'stock', neon: false } },
+  { id: 'v-sherpa', name: 'SHERPA 4x4', type: 'truck', price: 4500, speed: 65, handling: 92, description: 'Mountain expedition vehicle. Goes where roads end.', color: '#3a3a2a', customization: { paintColor: '#3a3a2a', rims: 'stock', engine: 'stock', neon: false } },
+  { id: 'v-viper', name: 'VIPER', type: 'motorcycle', price: 1500, speed: 99, handling: 55, description: 'Two wheels of fury. Lane-split everything.', color: '#ff2222', customization: { paintColor: '#ff2222', rims: 'stock', engine: 'stock', neon: false } },
+  { id: 'v-phantom', name: 'PHANTOM', type: 'motorcycle', price: 2500, speed: 96, handling: 60, description: 'Blacked out. You never see it coming.', color: '#111111', customization: { paintColor: '#111111', rims: 'stock', engine: 'stock', neon: false } },
 ];
 
 export const WEAPONS: WeaponItem[] = [
@@ -20,6 +22,19 @@ export const WEAPONS: WeaponItem[] = [
   { id: 'w-bat', name: 'LOUISVILLE SLUGGER', type: 'melee', price: 200, damage: 35, range: 3, description: 'Classic street tool. Silent but effective.' },
   { id: 'w-machete', name: 'MACHETE', type: 'melee', price: 350, damage: 45, range: 2, description: 'Mountain survival blade. Multi-purpose.' },
   { id: 'w-gold-45', name: 'GOLD .45', type: 'pistol', price: 5000, damage: 60, range: 35, description: 'Custom gold plated. For the boss only.' },
+  { id: 'w-vest', name: 'BODY ARMOR', type: 'armor', price: 1200, damage: 0, range: 0, description: 'Kevlar vest. +50 damage reduction.' },
+  { id: 'w-tac-vest', name: 'TACTICAL VEST', type: 'armor', price: 3000, damage: 0, range: 0, description: 'Military grade. +80 damage reduction with pockets.' },
+];
+
+export const TOOLS: ToolItem[] = [
+  { id: 't-shovel', name: 'SHOVEL', price: 300, description: 'Dig for hidden stashes and buried loot.', ability: 'dig', icon: '⛏️' },
+  { id: 't-pickaxe', name: 'PICKAXE', price: 500, description: 'Break through rock walls. Access hidden caves.', ability: 'mine', icon: '⛏️' },
+  { id: 't-detector', name: 'METAL DETECTOR', price: 800, description: 'Scan for buried treasure and caches nearby.', ability: 'detect', icon: '📡' },
+  { id: 't-drill', name: 'ADVANCED DRILL', price: 2000, description: 'Breach reinforced doors and safes.', ability: 'breach', icon: '🔧' },
+  { id: 't-flashlight', name: 'TACTICAL FLASHLIGHT', price: 200, description: 'See in the dark. Essential for cave exploration.', ability: 'light', icon: '🔦' },
+  { id: 't-climbing', name: 'CLIMBING GEAR', price: 1500, description: 'Scale cliffs on GraveDigger Mountain.', ability: 'climb', icon: '🧗' },
+  { id: 't-survival', name: 'SURVIVAL KIT', price: 1000, description: 'Reduces cold meter drain on the mountain by 50%.', ability: 'warmth', icon: '🎒' },
+  { id: 't-grapple', name: 'GRAPPLE HOOK', price: 2500, description: 'Reach inaccessible areas. Swing across gaps.', ability: 'grapple', icon: '🪝' },
 ];
 
 export const MUSIC_CATALOG: MusicAlbum[] = [
@@ -63,4 +78,32 @@ export const MUSIC_CATALOG: MusicAlbum[] = [
     tracks: ['Movement', 'Stack It Up', 'Ride or Die', 'Crew Love', 'Block Party', 'Empire State', 'GraveDigger Anthem', 'Final Chapter'],
     price: 2000, fansBoost: 1500, fameBoost: 60, owned: false,
   },
+];
+
+export const PAINT_COLORS = [
+  { id: 'black', name: 'MIDNIGHT BLACK', hex: '#0a0a0a' },
+  { id: 'white', name: 'ARCTIC WHITE', hex: '#e8e8e8' },
+  { id: 'red', name: 'BLOOD RED', hex: '#8b0000' },
+  { id: 'blue', name: 'OCEAN BLUE', hex: '#1a3a6a' },
+  { id: 'green', name: 'JUNGLE GREEN', hex: '#1e5a1e' },
+  { id: 'gold', name: 'CHAMPAGNE GOLD', hex: '#d4a017' },
+  { id: 'purple', name: 'ROYAL PURPLE', hex: '#4a0080' },
+  { id: 'pink', name: 'NBA PINK', hex: '#c4007a' },
+  { id: 'chrome', name: 'CHROME', hex: '#c0c0c0' },
+  { id: 'matte', name: 'MATTE GREY', hex: '#3a3a3a' },
+];
+
+export const RIM_OPTIONS = [
+  { id: 'stock', name: 'STOCK', price: 0 },
+  { id: 'sport', name: 'SPORT 20"', price: 500 },
+  { id: 'forgiato', name: 'FORGIATO 22"', price: 1500 },
+  { id: 'dub', name: 'DUB 24"', price: 2500 },
+  { id: 'wire', name: 'WIRE SPOKE', price: 800 },
+];
+
+export const ENGINE_OPTIONS = [
+  { id: 'stock', name: 'STOCK ENGINE', price: 0, speedBoost: 0 },
+  { id: 'tuned', name: 'STREET TUNE', price: 1000, speedBoost: 5 },
+  { id: 'turbo', name: 'TWIN TURBO', price: 3000, speedBoost: 12 },
+  { id: 'supercharged', name: 'SUPERCHARGED', price: 5000, speedBoost: 18 },
 ];

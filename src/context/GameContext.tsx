@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { GameState, GameSection, CrewMember } from '@/types/game';
+import { GameState, GameSection, CrewMember, VehicleCustomization } from '@/types/game';
 import { loadGameState, saveGameState, initialGameState } from '@/data/gameData';
-import { MUSIC_CATALOG, VEHICLES, WEAPONS } from '@/data/storeData';
+import { MUSIC_CATALOG, VEHICLES, WEAPONS, TOOLS } from '@/data/storeData';
 
 type GameAction =
   | { type: 'SET_SECTION'; section: GameSection }
@@ -23,7 +23,16 @@ type GameAction =
   | { type: 'SET_ACTIVE_VEHICLE'; vehicleId: string | null }
   | { type: 'BUY_WEAPON'; weaponId: string }
   | { type: 'EQUIP_WEAPON'; weaponId: string | null }
-  | { type: 'BUY_MUSIC'; albumId: string };
+  | { type: 'BUY_MUSIC'; albumId: string }
+  | { type: 'BUY_TOOL'; toolId: string }
+  | { type: 'EQUIP_TOOL'; toolId: string | null }
+  | { type: 'CUSTOMIZE_VEHICLE'; vehicleId: string; customization: Partial<VehicleCustomization> }
+  | { type: 'MUSIC_PLAY'; albumId: string; trackIndex: number }
+  | { type: 'MUSIC_PAUSE' }
+  | { type: 'MUSIC_NEXT' }
+  | { type: 'MUSIC_PREV' }
+  | { type: 'MUSIC_TOGGLE_SHUFFLE' }
+  | { type: 'MUSIC_TOGGLE_REPEAT' };
 
 function unlockMissions(state: GameState): GameState {
   const missions = state.missions.map(m => ({
@@ -173,11 +182,27 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         money: state.money - vehicle.price,
         ownedVehicles: [...state.ownedVehicles, action.vehicleId],
+        vehicleCustomizations: {
+          ...state.vehicleCustomizations,
+          [action.vehicleId]: { ...vehicle.customization },
+        },
       };
     }
 
     case 'SET_ACTIVE_VEHICLE':
       return { ...state, activeVehicle: action.vehicleId };
+
+    case 'CUSTOMIZE_VEHICLE': {
+      const current = state.vehicleCustomizations[action.vehicleId];
+      if (!current) return state;
+      return {
+        ...state,
+        vehicleCustomizations: {
+          ...state.vehicleCustomizations,
+          [action.vehicleId]: { ...current, ...action.customization },
+        },
+      };
+    }
 
     case 'BUY_WEAPON': {
       const weapon = WEAPONS.find(w => w.id === action.weaponId);
@@ -192,6 +217,19 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'EQUIP_WEAPON':
       return { ...state, equippedWeapon: action.weaponId };
 
+    case 'BUY_TOOL': {
+      const tool = TOOLS.find(t => t.id === action.toolId);
+      if (!tool || state.money < tool.price || state.ownedTools.includes(action.toolId)) return state;
+      return {
+        ...state,
+        money: state.money - tool.price,
+        ownedTools: [...state.ownedTools, action.toolId],
+      };
+    }
+
+    case 'EQUIP_TOOL':
+      return { ...state, equippedTool: action.toolId };
+
     case 'BUY_MUSIC': {
       const album = MUSIC_CATALOG.find(a => a.id === action.albumId);
       if (!album || state.money < album.price || state.ownedMusic.includes(action.albumId)) return state;
@@ -203,6 +241,45 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ownedMusic: [...state.ownedMusic, action.albumId],
       };
     }
+
+    // Music Player
+    case 'MUSIC_PLAY':
+      return {
+        ...state,
+        musicPlayer: { ...state.musicPlayer, isPlaying: true, currentAlbumId: action.albumId, currentTrackIndex: action.trackIndex },
+      };
+
+    case 'MUSIC_PAUSE':
+      return {
+        ...state,
+        musicPlayer: { ...state.musicPlayer, isPlaying: !state.musicPlayer.isPlaying },
+      };
+
+    case 'MUSIC_NEXT': {
+      const mp = state.musicPlayer;
+      if (!mp.currentAlbumId) return state;
+      const alb = MUSIC_CATALOG.find(a => a.id === mp.currentAlbumId);
+      if (!alb) return state;
+      const nextIdx = mp.shuffle
+        ? Math.floor(Math.random() * alb.tracks.length)
+        : (mp.currentTrackIndex + 1) % alb.tracks.length;
+      return { ...state, musicPlayer: { ...mp, currentTrackIndex: nextIdx, isPlaying: true } };
+    }
+
+    case 'MUSIC_PREV': {
+      const mp = state.musicPlayer;
+      if (!mp.currentAlbumId) return state;
+      const alb = MUSIC_CATALOG.find(a => a.id === mp.currentAlbumId);
+      if (!alb) return state;
+      const prevIdx = mp.currentTrackIndex > 0 ? mp.currentTrackIndex - 1 : alb.tracks.length - 1;
+      return { ...state, musicPlayer: { ...mp, currentTrackIndex: prevIdx, isPlaying: true } };
+    }
+
+    case 'MUSIC_TOGGLE_SHUFFLE':
+      return { ...state, musicPlayer: { ...state.musicPlayer, shuffle: !state.musicPlayer.shuffle } };
+
+    case 'MUSIC_TOGGLE_REPEAT':
+      return { ...state, musicPlayer: { ...state.musicPlayer, repeat: !state.musicPlayer.repeat } };
 
     case 'RESET_GAME':
       return { ...initialGameState };
