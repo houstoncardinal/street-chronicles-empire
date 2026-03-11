@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { RigidBody, CapsuleCollider } from '@react-three/rapier';
 import type { RapierRigidBody } from '@react-three/rapier';
@@ -20,21 +20,23 @@ export function Player() {
   const keys = useRef<Record<string, boolean>>({});
   const yaw = useRef(0);
   const pitch = useRef(0);
-  const canJump = useRef(true);
   const jumpCooldown = useRef(0);
 
-  // Keyboard handlers
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       keys.current[e.code] = true;
 
-      // E to interact
       if (e.code === 'KeyE' && state.nearInteraction && !state.showPanel) {
         const interaction = state.nearInteraction;
 
         if (interaction.type === 'travel') {
           const newRegion = state.currentRegion === 'city' ? 'mountain' : 'city';
           dispatch({ type: 'SET_REGION', region: newRegion as 'city' | 'mountain' });
+        } else if (interaction.type === 'character') {
+          // Open dialogue panel for character
+          const charId = interaction.id.replace('char-', '');
+          dispatch({ type: 'SET_SHOW_PANEL', panel: `dialogue:${charId}` });
+          document.exitPointerLock();
         } else if (interaction.type === 'mission') {
           dispatch({ type: 'SET_SHOW_PANEL', panel: `mission:${interaction.id}` });
           document.exitPointerLock();
@@ -64,7 +66,6 @@ export function Player() {
     };
   }, [state.nearInteraction, state.showPanel, state.currentRegion, dispatch]);
 
-  // Mouse look via pointer lock
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
       if (!document.pointerLockElement) return;
@@ -74,7 +75,7 @@ export function Player() {
     };
 
     const onClick = () => {
-      if (!document.pointerLockElement) {
+      if (!document.pointerLockElement && !state.showPanel) {
         document.body.requestPointerLock();
       }
     };
@@ -85,9 +86,8 @@ export function Player() {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('click', onClick);
     };
-  }, []);
+  }, [state.showPanel]);
 
-  // Frame update
   useFrame((_, delta) => {
     if (!rigidBody.current) return;
 
@@ -95,24 +95,20 @@ export function Player() {
     const pos = body.translation();
     const vel = body.linvel();
 
-    // Update shared player state
     playerState.x = pos.x;
     playerState.y = pos.y;
     playerState.z = pos.z;
     playerState.yaw = yaw.current;
 
-    // Camera
     const euler = new THREE.Euler(pitch.current, yaw.current, 0, 'YXZ');
     camera.quaternion.setFromEuler(euler);
     camera.position.set(pos.x, pos.y + 0.7, pos.z);
 
-    // Don't move when panel is open
     if (state.showPanel) {
       body.setLinvel({ x: 0, y: vel.y, z: 0 }, true);
       return;
     }
 
-    // Movement
     const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw.current);
     const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw.current);
 
@@ -133,7 +129,6 @@ export function Player() {
 
     body.setLinvel({ x: moveX, y: vel.y, z: moveZ }, true);
 
-    // Jump
     jumpCooldown.current = Math.max(0, jumpCooldown.current - delta);
     const grounded = Math.abs(vel.y) < 0.5 && pos.y < 100;
     if (keys.current['Space'] && grounded && jumpCooldown.current <= 0) {
@@ -141,13 +136,12 @@ export function Player() {
       jumpCooldown.current = 0.3;
     }
 
-    // Reset if fallen
     if (pos.y < -20) {
       body.setTranslation({ x: 0, y: 5, z: 10 }, true);
       body.setLinvel({ x: 0, y: 0, z: 0 }, true);
     }
 
-    // Check interaction proximity
+    // Proximity check for interactions
     const interactions = state.currentRegion === 'city' ? cityInteractions : mountainInteractions;
     let nearest: { type: string; id: string; label: string } | null = null;
     let nearestDist = INTERACTION_DISTANCE;
@@ -162,7 +156,6 @@ export function Player() {
       }
     }
 
-    // Only dispatch if changed
     if (nearest?.id !== state.nearInteraction?.id) {
       dispatch({ type: 'SET_NEAR_INTERACTION', interaction: nearest });
     }

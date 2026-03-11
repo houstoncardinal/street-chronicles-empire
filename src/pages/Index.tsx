@@ -2,6 +2,7 @@ import { GameProvider } from '@/context/GameContext';
 import { GameCanvas } from '@/components/game3d/GameCanvas';
 import { GameHUD } from '@/components/game3d/GameHUD';
 import { InteractionPanel } from '@/components/game3d/InteractionPanel';
+import { DialoguePanel } from '@/components/game3d/DialoguePanel';
 
 const Index = () => (
   <GameProvider>
@@ -9,6 +10,7 @@ const Index = () => (
       <GameCanvas />
       <GameHUD />
       <InteractionPanel />
+      <DialoguePanel />
     </div>
   </GameProvider>
 );
