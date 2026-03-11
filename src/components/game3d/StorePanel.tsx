@@ -18,6 +18,18 @@ export function StorePanel() {
   const isStore = panelType.startsWith('store:') || panelType === 'inventory' || panelType === 'garage';
   if (!isStore) return null;
 
+  // Auto-set tab on open
+  const getTab = (): StoreTab => {
+    if (panelType === 'inventory') return 'inventory';
+    if (panelType === 'garage') return 'garage';
+    if (panelType.startsWith('store:')) {
+      const t = panelType.split(':')[1] as StoreTab;
+      if (['vehicles', 'weapons', 'tools', 'music'].includes(t)) return t;
+    }
+    return tab;
+  };
+  const currentTab = getTab();
+
   const close = () => {
     dispatch({ type: 'SET_SHOW_PANEL', panel: null });
     setSelectedAlbum(null);
