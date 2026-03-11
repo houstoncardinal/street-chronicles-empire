@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { GameState, GameSection, CrewMember } from '@/types/game';
 import { loadGameState, saveGameState, initialGameState } from '@/data/gameData';
+import { MUSIC_CATALOG } from '@/data/storeData';
 
 type GameAction =
   | { type: 'SET_SECTION'; section: GameSection }
@@ -17,7 +18,12 @@ type GameAction =
   | { type: 'CHAT_WITH_CHARACTER'; characterId: string }
   | { type: 'BOOST_RELATIONSHIP'; characterId: string; amount: number }
   | { type: 'RECRUIT_CHARACTER'; characterId: string }
-  | { type: 'TOGGLE_CHARACTER_FOLLOW'; characterId: string };
+  | { type: 'TOGGLE_CHARACTER_FOLLOW'; characterId: string }
+  | { type: 'BUY_VEHICLE'; vehicleId: string }
+  | { type: 'SET_ACTIVE_VEHICLE'; vehicleId: string | null }
+  | { type: 'BUY_WEAPON'; weaponId: string }
+  | { type: 'EQUIP_WEAPON'; weaponId: string | null }
+  | { type: 'BUY_MUSIC'; albumId: string };
 
 function unlockMissions(state: GameState): GameState {
   const missions = state.missions.map(m => ({
@@ -159,6 +165,46 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         crew: [...state.crew, { ...action.member, recruited: true }],
         showPanel: null,
       };
+
+    case 'BUY_VEHICLE': {
+      const { VEHICLES } = require('@/data/storeData');
+      const vehicle = VEHICLES.find((v: any) => v.id === action.vehicleId);
+      if (!vehicle || state.money < vehicle.price || state.ownedVehicles.includes(action.vehicleId)) return state;
+      return {
+        ...state,
+        money: state.money - vehicle.price,
+        ownedVehicles: [...state.ownedVehicles, action.vehicleId],
+      };
+    }
+
+    case 'SET_ACTIVE_VEHICLE':
+      return { ...state, activeVehicle: action.vehicleId };
+
+    case 'BUY_WEAPON': {
+      const { WEAPONS } = require('@/data/storeData');
+      const weapon = WEAPONS.find((w: any) => w.id === action.weaponId);
+      if (!weapon || state.money < weapon.price || state.ownedWeapons.includes(action.weaponId)) return state;
+      return {
+        ...state,
+        money: state.money - weapon.price,
+        ownedWeapons: [...state.ownedWeapons, action.weaponId],
+      };
+    }
+
+    case 'EQUIP_WEAPON':
+      return { ...state, equippedWeapon: action.weaponId };
+
+    case 'BUY_MUSIC': {
+      const album = MUSIC_CATALOG.find(a => a.id === action.albumId);
+      if (!album || state.money < album.price || state.ownedMusic.includes(action.albumId)) return state;
+      return {
+        ...state,
+        money: state.money - album.price,
+        fans: state.fans + album.fansBoost,
+        industryFame: Math.min(100, state.industryFame + album.fameBoost),
+        ownedMusic: [...state.ownedMusic, action.albumId],
+      };
+    }
 
     case 'RESET_GAME':
       return { ...initialGameState };

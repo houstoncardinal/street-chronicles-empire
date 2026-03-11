@@ -1,11 +1,12 @@
 export interface InteractionPoint {
   id: string;
-  type: 'mission' | 'studio' | 'club' | 'recruit' | 'travel' | 'cabin' | 'cave' | 'stash' | 'character';
+  type: 'mission' | 'studio' | 'club' | 'recruit' | 'travel' | 'cabin' | 'cave' | 'stash' | 'character' | 'store';
   label: string;
   position: [number, number, number];
   missionId?: string;
   crewId?: string;
   characterId?: string;
+  storeType?: string;
 }
 
 import { CHARACTERS } from '@/data/characters';
