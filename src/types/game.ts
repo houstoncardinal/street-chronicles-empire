@@ -65,6 +65,10 @@ export interface GameState {
   completedMissions: number;
   totalTerritories: number;
   activeSection: string;
+  currentRegion: 'city' | 'mountain';
+  nearInteraction: { type: string; id: string; label: string } | null;
+  showPanel: string | null;
+  coldMeter: number;
 }
 
 export type GameSection = 'map' | 'missions' | 'crew' | 'studio' | 'reputation' | 'profile';
