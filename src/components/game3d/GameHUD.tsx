@@ -3,6 +3,7 @@ import { useGame } from '@/context/GameContext';
 import { playerState } from '@/stores/playerStore';
 import { cityInteractions, mountainInteractions } from '@/data/interactions';
 import { CHARACTERS } from '@/data/characters';
+import { VEHICLES, WEAPONS, TOOLS } from '@/data/storeData';
 
 export function GameHUD() {
   const { state } = useGame();
