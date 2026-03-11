@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { GameState, GameSection, CrewMember } from '@/types/game';
 import { loadGameState, saveGameState, initialGameState } from '@/data/gameData';
 
@@ -8,7 +8,12 @@ type GameAction =
   | { type: 'RECORD_SONG'; songId: string }
   | { type: 'RECRUIT_MEMBER'; member: CrewMember }
   | { type: 'RESET_GAME' }
-  | { type: 'UNLOCK_MISSIONS' };
+  | { type: 'UNLOCK_MISSIONS' }
+  | { type: 'SET_REGION'; region: 'city' | 'mountain' }
+  | { type: 'SET_NEAR_INTERACTION'; interaction: { type: string; id: string; label: string } | null }
+  | { type: 'SET_SHOW_PANEL'; panel: string | null }
+  | { type: 'ADD_MONEY'; amount: number }
+  | { type: 'UPDATE_COLD'; delta: number };
 
 function unlockMissions(state: GameState): GameState {
   const missions = state.missions.map(m => ({
@@ -27,6 +32,21 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'SET_SECTION':
       return { ...state, activeSection: action.section };
 
+    case 'SET_REGION':
+      return { ...state, currentRegion: action.region, showPanel: null, nearInteraction: null };
+
+    case 'SET_NEAR_INTERACTION':
+      return { ...state, nearInteraction: action.interaction };
+
+    case 'SET_SHOW_PANEL':
+      return { ...state, showPanel: action.panel };
+
+    case 'ADD_MONEY':
+      return { ...state, money: state.money + action.amount };
+
+    case 'UPDATE_COLD':
+      return { ...state, coldMeter: Math.max(0, Math.min(100, state.coldMeter + action.delta)) };
+
     case 'COMPLETE_MISSION': {
       const mission = state.missions.find(m => m.id === action.missionId);
       if (!mission || mission.completed) return state;
@@ -42,13 +62,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         missions: state.missions.map(m =>
           m.id === action.missionId ? { ...m, completed: true } : m
         ),
+        showPanel: null,
       };
 
-      // Level up every 2 completed missions
       const newLevel = Math.floor(newState.completedMissions / 2) + 1;
       newState.level = Math.max(state.level, newLevel);
 
-      // Update territory control
       const district = newState.districts.find(d => d.id === mission.district);
       if (district) {
         newState.districts = newState.districts.map(d =>
@@ -75,6 +94,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         songs: state.songs.map(s =>
           s.id === action.songId ? { ...s, recorded: true } : s
         ),
+        showPanel: null,
       };
     }
 
@@ -84,6 +104,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         money: state.money - 300,
         crew: [...state.crew, { ...action.member, recruited: true }],
+        showPanel: null,
       };
 
     case 'RESET_GAME':
