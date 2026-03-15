@@ -6,63 +6,72 @@
 
 @layer base {
   :root {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 90%;
+    --background: 215 25% 4%;
+    --foreground: 185 80% 88%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 90%;
+    --card: 215 25% 7%;
+    --card-foreground: 185 50% 85%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 90%;
+    --popover: 215 25% 7%;
+    --popover-foreground: 185 50% 85%;
 
-    --primary: 316 100% 47%;
-    --primary-foreground: 0 0% 100%;
+    /* Cyan primary */
+    --primary: 185 100% 48%;
+    --primary-foreground: 215 25% 4%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 215 25% 11%;
+    --secondary-foreground: 185 30% 75%;
 
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 215 20% 13%;
+    --muted-foreground: 215 15% 52%;
 
-    --accent: 316 100% 47%;
+    /* Magenta accent */
+    --accent: 300 100% 58%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 90% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 16%;
-    --input: 0 0% 16%;
-    --ring: 316 100% 47%;
+    --border: 215 25% 15%;
+    --input: 215 25% 15%;
+    --ring: 185 100% 48%;
 
     --radius: 0px;
 
-    --sidebar-background: 0 0% 6%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 316 100% 47%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 0 0% 16%;
-    --sidebar-ring: 316 100% 47%;
+    --sidebar-background: 215 25% 5%;
+    --sidebar-foreground: 185 50% 85%;
+    --sidebar-primary: 185 100% 48%;
+    --sidebar-primary-foreground: 215 25% 4%;
+    --sidebar-accent: 215 25% 11%;
+    --sidebar-accent-foreground: 185 30% 75%;
+    --sidebar-border: 215 25% 15%;
+    --sidebar-ring: 185 100% 48%;
 
-    /* Custom game tokens */
-    --neon-pink: 316 100% 47%;
-    --neon-pink-glow: 0 0 20px hsl(316 100% 47% / 0.6);
-    --asphalt: 0 0% 4%;
-    --concrete: 0 0% 8%;
-    --surface: 0 0% 12%;
-    --static-white: 0 0% 90%;
+    /* Cyberpunk neon tokens */
+    --neon-cyan: #00f0d0;
+    --neon-magenta: #f000b8;
+    --neon-yellow: #f0e000;
+    --neon-orange: #ff6600;
+    --neon-blue: #0080ff;
+    --neon-green: #00ff88;
+    --neon-red: #ff2244;
+
+    --neon-pink: 300 100% 58%;
+    --neon-pink-glow: 0 0 20px hsl(300 100% 58% / 0.6);
+    --asphalt: 215 25% 4%;
+    --concrete: 215 25% 7%;
+    --surface: 215 25% 11%;
+    --static-white: 185 30% 90%;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
 
   body {
     @apply bg-background text-foreground font-mono antialiased;
     font-family: 'Roboto Mono', monospace;
+    background-color: hsl(215, 25%, 4%);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -78,75 +87,208 @@
     text-transform: uppercase;
     letter-spacing: -0.02em;
   }
+  .font-body { font-family: 'Roboto Mono', monospace; }
 
-  .font-body {
-    font-family: 'Roboto Mono', monospace;
+  /* ── Cyan (primary) glows ── */
+  .glow-cyan {
+    box-shadow: 0 0 8px #00f0d0aa, 0 0 25px #00f0d044, 0 0 50px #00f0d011;
+  }
+  .glow-text-cyan {
+    text-shadow: 0 0 8px #00f0d0cc, 0 0 20px #00f0d066, 0 0 45px #00f0d022;
   }
 
-  .glow-pink {
-    box-shadow: 0 0 20px hsl(316 100% 47% / 0.4),
-                0 0 40px hsl(316 100% 47% / 0.1);
+  /* ── Magenta (accent) glows ── */
+  .glow-magenta {
+    box-shadow: 0 0 8px #f000b8aa, 0 0 25px #f000b844;
+  }
+  .glow-text-magenta {
+    text-shadow: 0 0 8px #f000b8cc, 0 0 20px #f000b866;
   }
 
-  .glow-text-pink {
-    text-shadow: 0 0 10px hsl(316 100% 47% / 0.6),
-                 0 0 30px hsl(316 100% 47% / 0.3);
-  }
+  /* Legacy aliases */
+  .glow-pink { @apply glow-magenta; }
+  .glow-text-pink { @apply glow-text-magenta; }
 
+  /* ── Neon bars ── */
   .neon-line {
-    background: hsl(316 100% 47%);
-    box-shadow: 0 0 8px hsl(316 100% 47% / 0.6),
-                0 0 20px hsl(316 100% 47% / 0.3);
+    background: var(--neon-cyan);
+    box-shadow: 0 0 8px #00f0d0cc, 0 0 20px #00f0d055;
+  }
+  .neon-line-magenta {
+    background: var(--neon-magenta);
+    box-shadow: 0 0 8px #f000b8cc, 0 0 20px #f000b855;
+  }
+  .neon-line-green {
+    background: var(--neon-green);
+    box-shadow: 0 0 8px #00ff88cc, 0 0 20px #00ff8855;
+  }
+  .neon-line-red {
+    background: var(--neon-red);
+    box-shadow: 0 0 8px #ff2244cc, 0 0 20px #ff224455;
   }
 
+  /* ── Panels ── */
   .panel {
-    @apply bg-card border border-border;
+    background: linear-gradient(135deg, hsl(215 25% 7%) 0%, hsl(215 30% 5%) 100%);
+    border: 1px solid hsl(215 25% 15%);
   }
-
+  .panel-cyber {
+    background: linear-gradient(135deg, hsl(215 25% 7%) 0%, hsl(200 30% 5%) 100%);
+    border: 1px solid #00f0d033;
+    box-shadow: 0 0 20px #00f0d008, inset 0 0 30px #00f0d005;
+  }
   .panel-hover {
-    @apply bg-card border border-border transition-all duration-200;
+    @apply transition-all duration-200;
+    background: linear-gradient(135deg, hsl(215 25% 7%) 0%, hsl(215 30% 5%) 100%);
+    border: 1px solid hsl(215 25% 15%);
   }
   .panel-hover:hover {
-    border-color: hsl(316 100% 47% / 0.4);
-    box-shadow: 0 0 15px hsl(316 100% 47% / 0.1);
+    border-color: #00f0d055;
+    box-shadow: 0 0 12px #00f0d015;
   }
 
-  .stat-bar {
-    @apply h-1 rounded-none;
-    background: hsl(0 0% 16%);
-  }
-
+  /* ── Stat bars ── */
+  .stat-bar { @apply h-1 rounded-none; background: hsl(215 25% 14%); }
   .stat-bar-fill {
     @apply h-full rounded-none transition-all duration-700 ease-out;
-    background: hsl(316 100% 47%);
-    box-shadow: 0 0 6px hsl(316 100% 47% / 0.5);
+    background: var(--neon-cyan);
+    box-shadow: 0 0 6px #00f0d0aa;
   }
 
+  /* ── Health bar states ── */
+  .hp-bar-high  { background: var(--neon-green);   box-shadow: 0 0 6px #00ff88aa; }
+  .hp-bar-mid   { background: var(--neon-yellow);  box-shadow: 0 0 6px #f0e000aa; }
+  .hp-bar-low   { background: var(--neon-red);     box-shadow: 0 0 6px #ff2244aa; animation: hp-pulse 0.7s ease-in-out infinite; }
+
+  /* ── Scanlines overlay ── */
+  .scanlines {
+    position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+    );
+  }
+
+  /* ── Corner bracket UI element ── */
+  .corner-bracket { position: relative; }
+  .corner-bracket::before, .corner-bracket::after {
+    content: ''; position: absolute; width: 8px; height: 8px;
+    border-color: #00f0d0bb; border-style: solid;
+  }
+  .corner-bracket::before { top: 0; left: 0; border-width: 1px 0 0 1px; }
+  .corner-bracket::after  { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+
+  /* ── Glitch text ── */
+  .glitch { animation: glitch 4s infinite; }
+  .glitch-fast { animation: glitch 1.5s infinite; }
+
+  /* ── Cyber button ── */
+  .btn-cyber {
+    position: relative;
+    font-family: 'Orbitron', sans-serif; text-transform: uppercase;
+    background: transparent;
+    border: 1px solid #00f0d066; color: var(--neon-cyan);
+    transition: all 0.15s;
+  }
+  .btn-cyber:hover {
+    background: #00f0d015; border-color: var(--neon-cyan);
+    box-shadow: 0 0 12px #00f0d033; color: #fff;
+  }
+  .btn-cyber:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-magenta {
+    background: transparent;
+    border: 1px solid #f000b866; color: var(--neon-magenta);
+    font-family: 'Orbitron', sans-serif; text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .btn-magenta:hover {
+    background: #f000b815; border-color: var(--neon-magenta);
+    box-shadow: 0 0 12px #f000b833; color: #fff;
+  }
+  .btn-magenta:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ── Drug tier colors ── */
+  .drug-tier-1 { color: #00ff88; }
+  .drug-tier-2 { color: #f0e000; }
+  .drug-tier-3 { color: #f000b8; }
+  .drug-tier-4 { color: var(--neon-cyan); }
+
+  /* ── Buff active indicator ── */
+  .buff-active {
+    border: 1px solid #f0e00088;
+    background: #f0e00010;
+    box-shadow: 0 0 10px #f0e00030;
+    animation: buff-pulse 1.5s ease-in-out infinite;
+  }
+
+  /* ── Nav icon ── */
   .nav-icon {
     @apply relative flex items-center justify-center w-10 h-10 text-muted-foreground transition-colors duration-200 cursor-pointer;
   }
-  .nav-icon:hover,
-  .nav-icon.active {
-    @apply text-primary;
-  }
+  .nav-icon:hover, .nav-icon.active { color: var(--neon-cyan); }
   .nav-icon.active::before {
     content: '';
     @apply absolute left-0 top-1 bottom-1 w-0.5;
-    background: hsl(316 100% 47%);
-    box-shadow: 0 0 8px hsl(316 100% 47% / 0.6);
+    background: var(--neon-cyan);
+    box-shadow: 0 0 8px #00f0d0cc;
   }
+
+  /* ── Wanted level dots ── */
+  .wanted-dot-active { background: var(--neon-red); box-shadow: 0 0 6px #ff2244cc; animation: hp-pulse 0.5s ease-in-out infinite; }
+  .wanted-dot-inactive { background: hsl(215 25% 20%); }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
+/* ── Keyframes ── */
+@keyframes glitch {
+  0%, 88%, 100% { transform: none; text-shadow: 0 0 8px #00f0d0cc; }
+  89%  { transform: skewX(3deg); text-shadow: -2px 0 #f000b8, 2px 0 #00f0d0; }
+  90%  { transform: skewX(-1.5deg); }
+  91%  { transform: none; text-shadow: 2px 0 #f000b8, -2px 0 #00f0d0; }
+  92%  { transform: translateX(2px); }
+  93%  { transform: none; }
 }
-::-webkit-scrollbar-track {
-  background: hsl(0 0% 4%);
+
+@keyframes hp-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
 }
-::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 20%);
+
+@keyframes buff-pulse {
+  0%, 100% { box-shadow: 0 0 10px #f0e00030; }
+  50% { box-shadow: 0 0 20px #f0e00070; }
 }
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(316 100% 47% / 0.5);
+
+@keyframes neon-flicker {
+  0%, 94%, 100% { opacity: 1; }
+  95% { opacity: 0.3; }
+  96% { opacity: 1; }
+  97% { opacity: 0.5; }
+  98% { opacity: 1; }
 }
+
+@keyframes scan-line {
+  0%   { top: -4px; }
+  100% { top: 100%; }
+}
+
+@keyframes data-in {
+  0%   { opacity: 0; transform: translateY(-6px); }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(6px); }
+}
+
+@keyframes muzzle-flash {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.5); }
+}
+
+.neon-flicker { animation: neon-flicker 5s infinite; }
+.muzzle { animation: muzzle-flash 0.08s ease-out forwards; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: hsl(215 25% 4%); }
+::-webkit-scrollbar-thumb { background: hsl(215 25% 18%); }
+::-webkit-scrollbar-thumb:hover { background: #00f0d066; }
