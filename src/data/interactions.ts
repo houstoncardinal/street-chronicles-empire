@@ -185,6 +185,49 @@ export const cityInteractions: InteractionPoint[] = [
   { id: 'citizen-9',  type: 'citizen', label: 'TALK [E]', position: [50,  1.5,  40] },
   { id: 'citizen-10', type: 'citizen', label: 'TALK [E]', position: [0,   1.5,  50] },
 
+  // ── North Blvd (Government St) ────────────────────────────────────────
+  { id: 'drug-northblvd',  type: 'drugmarket', label: 'NORTH CONNECT — BUY/SELL',       position: [-20,  1.5, -96] },
+  { id: 'store-northblvd', type: 'store',      label: 'GOVT ST MARKET',                 position: [-3,   1.5, -112], storeType: 'tools' },
+  { id: 'citizen-north-1', type: 'citizen',    label: 'TALK [E]',                       position: [15,   1.5, -88] },
+  { id: 'citizen-north-2', type: 'citizen',    label: 'TALK [E]',                       position: [-35,  1.5, -96] },
+  { id: 'mission-north-1', type: 'mission',    label: 'MISSION: GOVERNMENT BLOCK [E]',  position: [5,    1.5, -100], missionId: 'm-north-1' },
+
+  // ── Downtown District ─────────────────────────────────────────────────
+  { id: 'store-downtown-1',  type: 'store',   label: 'DOWNTOWN WEAPONS DEPOT',          position: [100,  1.5, -38], storeType: 'weapons' },
+  { id: 'store-downtown-2',  type: 'store',   label: 'CANAL ST MARKET',                 position: [100,  1.5,  25], storeType: 'tools' },
+  { id: 'store-downtown-3',  type: 'store',   label: 'DOWNTOWN MUSIC',                  position: [100,  1.5, -10], storeType: 'music' },
+  { id: 'cafe-downtown',     type: 'cafe',    label: 'SKYLINE CAFE — BUFFS [E]',        position: [120,  1.5,   0] },
+  { id: 'mission-downtown',  type: 'mission', label: 'MISSION: TOWER HUSTLE [E]',       position: [140,  1.5, -20], missionId: 'm-downtown' },
+  { id: 'citizen-dt-1',      type: 'citizen', label: 'TALK [E]',                        position: [155,  1.5,  10] },
+  { id: 'citizen-dt-2',      type: 'citizen', label: 'TALK [E]',                        position: [110,  1.5, -50] },
+
+  // ── Cortana Mall ──────────────────────────────────────────────────────
+  { id: 'store-mall-1',      type: 'store',      label: 'NBA MERCH STORE',              position: [122,  1.5, 153], storeType: 'tools' },
+  { id: 'store-mall-2',      type: 'store',      label: 'TRAP KICKS — SNEAKER LAB',     position: [133,  1.5, 153], storeType: 'tools' },
+  { id: 'store-mall-3',      type: 'store',      label: 'GOLD CHAIN JEWELS',            position: [122,  1.5, 137], storeType: 'tools' },
+  { id: 'store-mall-music',  type: 'store',      label: 'CORTANA MUSIC OUTLET',         position: [155,  1.5, 137], storeType: 'music' },
+  { id: 'cafe-mall',         type: 'cafe',       label: 'FOOD COURT — STREET FOOD [E]', position: [148,  1.5, 145] },
+  { id: 'drug-mall',         type: 'drugmarket', label: 'BACK LOT CONNECT',             position: [190,  1.5, 125] },
+  { id: 'mission-mall',      type: 'mission',    label: 'MISSION: MALL TAKEOVER [E]',   position: [185,  1.5, 148], missionId: 'm-mall' },
+  { id: 'citizen-mall-1',    type: 'citizen',    label: 'TALK [E]',                     position: [120,  1.5, 155] },
+
+  // ── West Suburbs ──────────────────────────────────────────────────────
+  { id: 'store-west-1',   type: 'store',   label: 'WESTSIDE GAS STATION',              position: [-95,  1.5, -20], storeType: 'vehicles' },
+  { id: 'store-west-2',   type: 'store',   label: 'WESTSIDE CORNER SHOP',              position: [-95,  1.5,  20], storeType: 'tools' },
+  { id: 'mission-west',   type: 'mission', label: 'MISSION: SUBURB SWEEP [E]',         position: [-120, 1.5,   0], missionId: 'm-west' },
+  { id: 'citizen-west-1', type: 'citizen', label: 'TALK [E]',                          position: [-105, 1.5, -22] },
+  { id: 'citizen-west-2', type: 'citizen', label: 'TALK [E]',                          position: [-140, 1.5,  15] },
+
+  // ── Highway I-110 (on deck at y=7.5) ─────────────────────────────────
+  { id: 'highway-110-north', type: 'travel', label: 'I-110 N → GRAVEDIGGER MOUNTAIN', position: [130, 7.5, -162] },
+  { id: 'highway-110-south', type: 'travel', label: 'I-110 S → BAYOU',                position: [130, 7.5,  162] },
+
+  // ── 3D Model interactive spots ────────────────────────────────────────
+  { id: 'mission-ghost',   type: 'mission', label: 'GHOST ENCOUNTER [E]',  position: [8,   1.5, -38], missionId: 'm-ghost'   },
+  { id: 'mission-console', type: 'mission', label: 'RETRO CONSOLE [E]',    position: [-6,  1.5, -46], missionId: 'm-console' },
+  { id: 'warrior-npc',     type: 'citizen', label: 'WARRIOR: TALK [E]',    position: [-50, 1.5, -90] },
+  { id: 'downtown-76',     type: 'citizen', label: '76 SCULPTURE: INSPECT [E]', position: [112, 1.5, -8] },
+
   ...characterInteractions,
 ];
 

@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Blender source files + oversized assets (not needed for web build)
+*.blend
+public/1.gltf
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

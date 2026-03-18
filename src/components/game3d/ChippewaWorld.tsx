@@ -254,10 +254,10 @@ function ShotgunHouse({ x, z, rot = 0, wallColor = HOUSE_CREAM,
         <group key={i} position={[px, 1.38, 1.925]}>
           {/* Window frame */}
           <Box pos={[0, 0, 0]} size={[0.78, 0.88, 0.06]} color={trimColor} />
-          {/* Glass — always warm-lit */}
+          {/* Glass — warm emissive window glow */}
           <mesh position={[0, 0, 0.04]}>
             <planeGeometry args={[0.62, 0.72]} />
-            <meshBasicMaterial color="#ffcc44" transparent opacity={0.55} />
+            <meshStandardMaterial color="#ffcc44" emissive="#ffcc44" emissiveIntensity={0.18} transparent opacity={0.65} />
           </mesh>
           {/* Shutters */}
           <Box pos={[-0.52, 0, 0.01]} size={[0.22, 0.88, 0.04]} color={TRIM_GREEN} roughness={0.8} />
@@ -332,7 +332,7 @@ function CreoleCottage({ x, z, rot = 0, wallColor = HOUSE_YELLOW,
           <Box pos={[0, 0, 0]} size={[0.82, 1.12, 0.06]} color="#ddd0b8" />
           <mesh position={[0, 0, 0.04]}>
             <planeGeometry args={[0.68, 0.98]} />
-            <meshBasicMaterial color="#ffcc44" transparent opacity={0.55} />
+            <meshStandardMaterial color="#ffcc44" emissive="#ffcc44" emissiveIntensity={0.18} transparent opacity={0.65} />
           </mesh>
           <Box pos={[-0.55, 0, 0.01]} size={[0.24, 1.12, 0.04]} color={shutterColor} roughness={0.8} />
           <Box pos={[ 0.55, 0, 0.01]} size={[0.24, 1.12, 0.04]} color={shutterColor} roughness={0.8} />
@@ -717,7 +717,7 @@ function WeatherController() {
   const cycleIdx = useRef(0);
 
   useEffect(() => {
-    scene.fog = new THREE.Fog('#c8e4f8', 60, 280);
+    scene.fog = new THREE.Fog('#c8e4f8', 40, 200);
     return () => { scene.fog = null; };
   }, [scene]);
 
@@ -750,10 +750,10 @@ function WeatherController() {
 
   return (
     <>
-      <ambientLight ref={ambientRef} color="#d8eaf8" intensity={1.8} />
-      <directionalLight ref={sunRef} color="#fff8e0" intensity={3.0}
-        position={[50, 80, -30]} castShadow={false} />
-      <hemisphereLight ref={hemiRef} args={['#87ceeb', '#7a9a60', 0.6]} />
+      <ambientLight ref={ambientRef} color="#e8d8c8" intensity={1.8} />
+      <directionalLight ref={sunRef} color="#fff8e0" intensity={4.2}
+        position={[80, 100, -20]} castShadow={false} />
+      <hemisphereLight ref={hemiRef} args={['#87aad8', '#6a5a3a', 0.6]} />
     </>
   );
 }
@@ -765,9 +765,15 @@ export function ChippewaWorld() {
   return (
     <>
       {/* ── Daytime Sky Dome ── */}
+      {/* Upper sky — deep rich blue */}
       <mesh>
         <sphereGeometry args={[490, 16, 8]} />
-        <meshBasicMaterial color="#5fa8d3" side={THREE.BackSide} />
+        <meshBasicMaterial color="#2a5fa8" side={THREE.BackSide} />
+      </mesh>
+      {/* Horizon gradient — lighter blue blends at the base */}
+      <mesh position={[0, -60, 0]}>
+        <sphereGeometry args={[488, 16, 6, 0, Math.PI * 2, 0, Math.PI * 0.38]} />
+        <meshBasicMaterial color="#87ceeb" side={THREE.BackSide} transparent opacity={0.85} />
       </mesh>
       {/* Horizon haze ring */}
       <mesh rotation={[Math.PI / 2, 0, 0]}>
@@ -783,12 +789,29 @@ export function ChippewaWorld() {
 
       {/* ── Ground Layers ── */}
       <RigidBody type="fixed" colliders="cuboid">
-        {/* Asphalt road — slightly wet, reflects lights */}
-        <mesh position={[0, 0, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[160, 160]} />
-          <meshStandardMaterial color={ASPHALT} roughness={0.55} metalness={0.3} envMapIntensity={1.2} />
+        {/* Expanded ground — covers entire city district (500×500) */}
+        <mesh position={[20, 0, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[500, 500]} />
+          <meshStandardMaterial color={ASPHALT} roughness={0.45} metalness={0.3} envMapIntensity={1.8} />
         </mesh>
       </RigidBody>
+
+      {/* ── Connector roads to new districts ── */}
+      {/* North connector: Chippewa → Government St */}
+      <mesh position={[0, 0.006, -55]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[12, 40]} />
+        <meshStandardMaterial color={ASPHALT} roughness={0.55} metalness={0.2} />
+      </mesh>
+      {/* East connector: Chippewa → Downtown */}
+      <mesh position={[81, 0.006, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[18, 14]} />
+        <meshStandardMaterial color={ASPHALT} roughness={0.55} metalness={0.2} />
+      </mesh>
+      {/* West connector: Chippewa → West Suburbs */}
+      <mesh position={[-81, 0.006, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[18, 14]} />
+        <meshStandardMaterial color={ASPHALT} roughness={0.55} metalness={0.2} />
+      </mesh>
 
       {/* Grass neutral ground / parkway strips (between road and sidewalk) */}
       {/* North parkway */}
@@ -1302,60 +1325,79 @@ export function ChippewaWorld() {
         </group>
       </group>
 
-      {/* ══ INVISIBLE BUILDING COLLIDERS — one solid box per building ═══════
-          ShotgunHouse body: 5.4 × 3.84, center at building (x,z)
-          CreoleCottage body: 6.2 × 5.8, center at building (x,z)
-          Height 4.5 covers body + roof so player can't jump over.       */}
+      {/* ══ INVISIBLE BUILDING COLLIDERS ══════════════════════════════════════
+          Each collider covers the FULL visual footprint: body + porch/gallery.
+          ShotgunHouse: body z±1.92, porch extends +1.33 → total depth 5.25
+            rot=PI (north): porch faces world -z, center shifts to -19.67
+            rot=0  (south): porch faces world +z, center shifts to +19.67
+          CreoleCottage: body z±2.9, gallery extends +1.12 → total depth 7.02
+            rot=PI (north): center shifts to -22.56
+            rot=0  (south): center shifts to +22.56                         */}
 
-      {/* ── North side shotgun houses (z=-19) ── */}
+      {/* ── North side shotgun houses (rot=PI, porch faces -z) ── */}
       {([-59,-46,-33,-5,23,36] as number[]).map(bx => (
         <RigidBody key={`ns-${bx}`} type="fixed">
-          <mesh position={[bx, 2.25, -19]} visible={false}>
-            <boxGeometry args={[5.4, 4.5, 3.84]} />
+          <mesh position={[bx, 2.25, -19.67]} visible={false}>
+            <boxGeometry args={[5.6, 4.5, 5.25]} />
             <meshBasicMaterial />
           </mesh>
         </RigidBody>
       ))}
-      {/* ── North side creole cottages (z=-22) ── */}
+      {/* ── North side creole cottages (rot=PI, gallery faces -z) ── */}
       {([-19, 9, 50] as number[]).map(bx => (
         <RigidBody key={`nc-${bx}`} type="fixed">
-          <mesh position={[bx, 2.5, -22]} visible={false}>
-            <boxGeometry args={[6.2, 5.0, 5.8]} />
+          <mesh position={[bx, 2.5, -22.56]} visible={false}>
+            <boxGeometry args={[6.4, 5.0, 7.02]} />
             <meshBasicMaterial />
           </mesh>
         </RigidBody>
       ))}
 
-      {/* ── South side shotgun houses (z=19) ── */}
+      {/* ── South side shotgun houses (rot=0, porch faces +z) ── */}
       {([-60,-48,-20,-6,22,35] as number[]).map(bx => (
         <RigidBody key={`ss-${bx}`} type="fixed">
-          <mesh position={[bx, 2.25, 19]} visible={false}>
-            <boxGeometry args={[5.4, 4.5, 3.84]} />
+          <mesh position={[bx, 2.25, 19.67]} visible={false}>
+            <boxGeometry args={[5.6, 4.5, 5.25]} />
             <meshBasicMaterial />
           </mesh>
         </RigidBody>
       ))}
-      {/* ── South side creole cottages (z=22) ── */}
+      {/* ── South side creole cottages (rot=0, gallery faces +z) ── */}
       {([-34, 8, 49] as number[]).map(bx => (
         <RigidBody key={`sc-${bx}`} type="fixed">
-          <mesh position={[bx, 2.5, 22]} visible={false}>
-            <boxGeometry args={[6.2, 5.0, 5.8]} />
+          <mesh position={[bx, 2.5, 22.56]} visible={false}>
+            <boxGeometry args={[6.4, 5.0, 7.02]} />
             <meshBasicMaterial />
           </mesh>
         </RigidBody>
       ))}
 
-      {/* ── Left boundary wall ── */}
+      {/* ── Expanded outer boundary walls (covers full city district) ── */}
+      {/* West wall x=-220 */}
       <RigidBody type="fixed">
-        <mesh position={[-72, 2.5, 0]} visible={false}>
-          <boxGeometry args={[0.4, 5, 60]} />
+        <mesh position={[-220, 2.5, 0]} visible={false}>
+          <boxGeometry args={[0.4, 5, 500]} />
           <meshBasicMaterial />
         </mesh>
       </RigidBody>
-      {/* ── Right boundary wall ── */}
+      {/* East wall x=+240 */}
       <RigidBody type="fixed">
-        <mesh position={[72, 2.5, 0]} visible={false}>
-          <boxGeometry args={[0.4, 5, 60]} />
+        <mesh position={[240, 2.5, 0]} visible={false}>
+          <boxGeometry args={[0.4, 5, 500]} />
+          <meshBasicMaterial />
+        </mesh>
+      </RigidBody>
+      {/* North wall z=-220 */}
+      <RigidBody type="fixed">
+        <mesh position={[20, 2.5, -220]} visible={false}>
+          <boxGeometry args={[500, 5, 0.4]} />
+          <meshBasicMaterial />
+        </mesh>
+      </RigidBody>
+      {/* South wall z=+220 */}
+      <RigidBody type="fixed">
+        <mesh position={[20, 2.5, 220]} visible={false}>
+          <boxGeometry args={[500, 5, 0.4]} />
           <meshBasicMaterial />
         </mesh>
       </RigidBody>

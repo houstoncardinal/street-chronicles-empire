@@ -3,6 +3,11 @@ import { Physics } from '@react-three/rapier';
 import * as THREE from 'three';
 import { Player } from './Player';
 import { ChippewaWorld } from './ChippewaWorld';
+import { NorthBlvd } from './NorthBlvd';
+import { DowntownDistrict } from './DowntownDistrict';
+import { CortanaMall } from './CortanaMall';
+import { WestSuburbs } from './WestSuburbs';
+import { Highway110 } from './Highway110';
 import { MountainWorld } from './MountainWorld';
 import { BayouWorld } from './BayouWorld';
 import { CharacterModel } from './CharacterModel';
@@ -18,6 +23,7 @@ import { PoliceSystem } from './PoliceSystem';
 import { PedestrianSystem } from './PedestrianSystem';
 import { WeaponEffects } from './WeaponEffects';
 import { DynamicEvents } from './DynamicEvents';
+import { WorldModels } from './WorldModels';
 
 export function GameCanvas() {
   const { state, dispatch } = useGame();
@@ -32,13 +38,31 @@ export function GameCanvas() {
   const renderWorld = () => {
     switch (state.currentRegion) {
       case 'city':
-        return <ChippewaWorld />;
+        return (
+          <>
+            <ChippewaWorld />
+            <NorthBlvd />
+            <DowntownDistrict />
+            <CortanaMall />
+            <WestSuburbs />
+            <Highway110 />
+          </>
+        );
       case 'mountain':
         return <MountainWorld />;
       case 'bayou':
         return <BayouWorld />;
       default:
-        return <ChippewaWorld />;
+        return (
+          <>
+            <ChippewaWorld />
+            <NorthBlvd />
+            <DowntownDistrict />
+            <CortanaMall />
+            <WestSuburbs />
+            <Highway110 />
+          </>
+        );
     }
   };
 
@@ -71,6 +95,9 @@ export function GameCanvas() {
 
           {/* Weapon effects — muzzle flash, bullet tracers, impact sparks */}
           <WeaponEffects />
+
+          {/* 3D model inhabitants — city only */}
+          {state.currentRegion === 'city' && <WorldModels />}
 
           {/* Enemy NPCs — only in city region */}
           {state.currentRegion === 'city' && ENEMY_SPAWNS.map(s => (
