@@ -7,7 +7,7 @@ import { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { weatherStore, applyWeather, SEASON_WEATHER, SEASON_CYCLE, getSkyColors, getSunData } from '@/stores/weatherStore';
 import * as THREE from 'three';
-import { RigidBody } from '@react-three/rapier';
+import { RigidBody, CuboidCollider } from '@react-three/rapier';
 import { Text } from '@react-three/drei';
 
 // ── Luxury Palette ─────────────────────────────────────────────────────────
@@ -53,40 +53,46 @@ const BRICK_WALK     = '#8a7460';
 const CURB           = '#6a6860';
 
 // ── Procedural road texture (asphalt grain + aggregate) ───────────────────
-function makeRoadTexture(): THREE.CanvasTexture {
-  const c = document.createElement('canvas');
-  c.width = 512; c.height = 512;
-  const ctx = c.getContext('2d')!;
-  ctx.fillStyle = '#1c1c22';
-  ctx.fillRect(0, 0, 512, 512);
-  // Fine grain
-  for (let i = 0; i < 7000; i++) {
-    const v = 24 + Math.random() * 20;
-    ctx.fillStyle = `rgba(${v},${v},${v + 2},${0.35 + Math.random() * 0.45})`;
-    ctx.fillRect(Math.random() * 512, Math.random() * 512, Math.random() * 2.5 + 0.5, 1);
+function makeRoadTexture(): THREE.CanvasTexture | null {
+  try {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    if (!ctx) return null;
+    // Mid-grey asphalt base (matches ASPHALT_LIGHT so overlay blends smoothly)
+    ctx.fillStyle = '#2e2e36';
+    ctx.fillRect(0, 0, 512, 512);
+    // Fine grain — subtle, not too dark
+    for (let i = 0; i < 6000; i++) {
+      const v = 40 + Math.random() * 22;
+      ctx.fillStyle = `rgba(${v},${v},${v + 2},${0.22 + Math.random() * 0.28})`;
+      ctx.fillRect(Math.random() * 512, Math.random() * 512, Math.random() * 2 + 0.5, 1);
+    }
+    // Light aggregate flecks
+    for (let i = 0; i < 400; i++) {
+      const v = 70 + Math.random() * 40;
+      ctx.fillStyle = `rgba(${v},${v},${v},0.22)`;
+      ctx.beginPath();
+      ctx.arc(Math.random() * 512, Math.random() * 512, 0.5 + Math.random() * 1.0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Very faint hairline cracks
+    for (let i = 0; i < 8; i++) {
+      ctx.strokeStyle = `rgba(20,20,28,${0.15 + Math.random() * 0.18})`;
+      ctx.lineWidth   = Math.random() * 0.8 + 0.2;
+      ctx.beginPath();
+      const sx = Math.random() * 512, sy = Math.random() * 512;
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(sx + (Math.random() - 0.5) * 120, sy + (Math.random() - 0.5) * 90);
+      ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(14, 3);
+    return tex;
+  } catch {
+    return null;
   }
-  // Aggregate flecks (light-coloured stones in asphalt)
-  for (let i = 0; i < 500; i++) {
-    const v = 55 + Math.random() * 45;
-    ctx.fillStyle = `rgba(${v},${v},${v - 3},0.28)`;
-    ctx.beginPath();
-    ctx.arc(Math.random() * 512, Math.random() * 512, 0.6 + Math.random() * 1.2, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  // Hairline cracks
-  for (let i = 0; i < 10; i++) {
-    ctx.strokeStyle = `rgba(55,55,62,${0.25 + Math.random() * 0.3})`;
-    ctx.lineWidth   = Math.random() * 1.2 + 0.3;
-    ctx.beginPath();
-    const sx = Math.random() * 512, sy = Math.random() * 512;
-    ctx.moveTo(sx, sy);
-    ctx.lineTo(sx + (Math.random() - 0.5) * 160, sy + (Math.random() - 0.5) * 120);
-    ctx.stroke();
-  }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(14, 3);
-  return tex;
 }
 
 // ── Box Helper ────────────────────────────────────────────────────────────
@@ -1416,7 +1422,7 @@ function RoadMarkings() {
 // MAIN WORLD
 // ══════════════════════════════════════════════════════════════════════════
 export function ChippewaWorld() {
-  const roadTexture = useMemo(() => makeRoadTexture(), []);
+  const roadTexture = useMemo(() => makeRoadTexture() ?? undefined, []);
   return (
     <>
       {/* ── Day/Night + Weather + Season (all-in-one) ── */}
@@ -1426,23 +1432,25 @@ export function ChippewaWorld() {
       <CloudLayer />
 
       {/* ── Ground Layers ── */}
-      <RigidBody type="fixed" colliders="cuboid">
+      {/* Explicit thick cuboid collider — plane geometry alone gives zero-height
+          bounding box which can fail to generate a reliable Rapier collider */}
+      <RigidBody type="fixed" colliders={false}>
+        <CuboidCollider args={[250, 0.55, 250]} position={[20, -0.55, 0]} />
         {/* Expanded ground — covers entire city district (500×500) */}
         <mesh position={[20, 0, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[500, 500]} />
-          <meshStandardMaterial color={ASPHALT} roughness={0.55} metalness={0.18} />
+          <meshStandardMaterial color={ASPHALT} roughness={0.45} metalness={0.3} />
         </mesh>
       </RigidBody>
 
-      {/* Detailed road surface with canvas grain texture — Chippewa Blvd only */}
-      <mesh position={[0, 0.004, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+      {/* Road surface detail — Chippewa Blvd (subtle lighter overlay, no z-fighting) */}
+      <mesh position={[0, 0.003, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[140, 18]} />
         <meshStandardMaterial
-          color={ASPHALT}
+          color={ASPHALT_LIGHT}
           map={roadTexture}
-          roughness={0.42}
-          metalness={0.10}
-          envMapIntensity={2.2}
+          roughness={0.50}
+          metalness={0.12}
         />
       </mesh>
 
