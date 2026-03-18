@@ -21,11 +21,13 @@
  *
  * 1.gltf  — SKIPPED: 143 MB embedded buffer, cannot be streamed in real-time.
  */
-import { useRef, useState } from 'react';
+import { useRef, useState, Suspense } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF, Clone, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { playerState } from '@/stores/playerStore';
+import { CityBus } from './CityBus';
+import { SecurityGuards } from './SecurityGuards';
 
 function distSq(ax: number, az: number, bx: number, bz: number) {
   return (ax - bx) ** 2 + (az - bz) ** 2;
@@ -361,20 +363,6 @@ function CourthouseBuilding() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MEDIEVAL STONE HOUSE — atmospheric prop in West Suburbs
-// ─────────────────────────────────────────────────────────────────────────────
-function MedievalHouse() {
-  const { scene } = useGLTF(
-    '/medieval-stone-and-timber-house-with-tower-2026-02-10-22-34-11-utc/%5BGLTF%5D%20House_04/House_04.gltf'
-  ) as any;
-  return (
-    <group position={[-162, 0, 52]} rotation={[0, Math.PI * 0.3, 0]} scale={1.6}>
-      <primitive object={scene} />
-    </group>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // GAMES GUN — interactive colorful gun pickup on the street
 // Walk up and press [E] to pick up
 // ─────────────────────────────────────────────────────────────────────────────
@@ -474,12 +462,21 @@ export function WorldModels() {
       {/* New: buildings */}
       <HotelBuilding />
       <CourthouseBuilding />
-      <MedievalHouse />
       <Prop10Building />
 
       {/* New: interactive props */}
       <GamesGunPickup />
       <ChristmasTree />
+
+      {/* City bus — KB3D FBX, drives east-west on Chippewa Blvd */}
+      <Suspense fallback={null}>
+        <CityBus />
+      </Suspense>
+
+      {/* Security guards — patrolling key city spots */}
+      <Suspense fallback={null}>
+        <SecurityGuards />
+      </Suspense>
     </>
   );
 }
@@ -495,7 +492,6 @@ useGLTF.preload('/14_Game%20Console.glb');
 useGLTF.preload('/14_Palm%20Tree.glb');
 useGLTF.preload('/cartoon-hotel-building-structure-2026-02-08-13-35-25-utc/1.Hotel.glb');
 useGLTF.preload('/courthouse-building-3d-illustration-2026-01-18-02-54-11-utc/10_Courthouse%20Building.glb');
-useGLTF.preload('/medieval-stone-and-timber-house-with-tower-2026-02-10-22-34-11-utc/%5BGLTF%5D%20House_04/House_04.gltf');
 useGLTF.preload('/vibrantly-colored-toy-gun-2026-02-09-00-00-02-utc/GAMES%20GUN.glb');
 useGLTF.preload('/icons8_christmas_tree_long_barrel.glb');
 useGLTF.preload('/10.gltf');

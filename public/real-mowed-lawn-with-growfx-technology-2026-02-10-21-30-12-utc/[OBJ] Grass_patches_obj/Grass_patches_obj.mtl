@@ -1,0 +1,72 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 03.03.2020 17:46:46
+
+newmtl Mowed_lawn
+	Ns 71.4286
+	Ni 1.6000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5880 0.5880 0.5880
+	Kd 0.5000 0.5000 0.5000
+	Ks 0.0000 0.0000 0.0000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka Mowed_lawn.jpg
+	map_Kd Mowed_lawn.jpg
+
+newmtl grass_001
+	Ns 53.5714
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5000 0.5000 0.5000
+	Kd 0.5000 0.5000 0.5000
+	Ks 0.4969 0.4969 0.4969
+	Ke 0.0000 0.0000 0.0000
+	map_Ka H:\3DIllusion\_3Dmodels\_turbo\_EXPORT\Grasses_Lawn\Grass_lawn_2\Grass_lawn_patches_max_growfx\Simple_grass_leaf_01.jpg
+	map_Kd H:\3DIllusion\_3Dmodels\_turbo\_EXPORT\Grasses_Lawn\Grass_lawn_2\Grass_lawn_patches_max_growfx\Simple_grass_leaf_01.jpg
+
+newmtl grass_003
+	Ns 53.5714
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5000 0.5000 0.5000
+	Kd 0.5000 0.5000 0.5000
+	Ks 0.4969 0.4969 0.4969
+	Ke 0.0000 0.0000 0.0000
+	map_Ka H:\3DIllusion\_3Dmodels\_turbo\_EXPORT\Grasses_Lawn\Grass_lawn_2\Grass_lawn_patches_max_growfx\Simple_grass_leaf_02.jpg
+	map_Kd H:\3DIllusion\_3Dmodels\_turbo\_EXPORT\Grasses_Lawn\Grass_lawn_2\Grass_lawn_patches_max_growfx\Simple_grass_leaf_02.jpg
+
+newmtl grass_004
+	Ns 53.5714
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5000 0.5000 0.5000
+	Kd 0.5000 0.5000 0.5000
+	Ks 0.4969 0.4969 0.4969
+	Ke 0.0000 0.0000 0.0000
+	map_Ka H:\3DIllusion\_3Dmodels\_turbo\_EXPORT\Grasses_Lawn\Grass_lawn_2\Grass_lawn_patches_max_growfx\Simple_grass_leaf_04.jpg
+	map_Kd H:\3DIllusion\_3Dmodels\_turbo\_EXPORT\Grasses_Lawn\Grass_lawn_2\Grass_lawn_patches_max_growfx\Simple_grass_leaf_04.jpg
+
+newmtl grass_005
+	Ns 53.5714
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.5000 0.5000 0.5000
+	Kd 0.5000 0.5000 0.5000
+	Ks 0.4969 0.4969 0.4969
+	Ke 0.0000 0.0000 0.0000
+	map_Ka H:\3DIllusion\_3Dmodels\_turbo\_EXPORT\Grasses_Lawn\Grass_lawn_2\Grass_lawn_patches_max_growfx\Simple_grass_leaf_05.tga
+	map_Kd H:\3DIllusion\_3Dmodels\_turbo\_EXPORT\Grasses_Lawn\Grass_lawn_2\Grass_lawn_patches_max_growfx\Simple_grass_leaf_05.tga

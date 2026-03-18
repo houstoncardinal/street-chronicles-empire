@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGame } from '@/context/GameContext';
 
 interface PlayableCharacter {
   id: string;
   name: string;
+  fullName: string;
   title: string;
+  tagline: string;
   image: string;
   accentColor: string;
-  glowColor: string;
-  abilities: string[];
+  bgColor: string;
+  abilities: { name: string; desc: string }[];
   stats: { label: string; value: number }[];
   bio: string;
 }
@@ -17,52 +19,121 @@ const PLAYABLE: PlayableCharacter[] = [
   {
     id: 'yb',
     name: 'YB',
-    title: 'THE LEADER',
+    fullName: 'NBA YOUNGBOY',
+    title: 'STORY GATEKEEPER',
+    tagline: 'NEVER BROKE AGAIN',
     image: '/yb.png',
     accentColor: '#FFD700',
-    glowColor: '#FFD70055',
-    abilities: ['Leadership Aura', 'Major Moves', 'Street Royalty'],
-    stats: [
-      { label: 'STREET',   value: 95 },
-      { label: 'INFLUENCE', value: 90 },
-      { label: 'LOYALTY',   value: 100 },
-      { label: 'HUSTLE',    value: 88 },
+    bgColor: '#1a1200',
+    abilities: [
+      { name: 'MAJOR MOVES', desc: 'Unlocks new regions and campaign missions' },
+      { name: 'STREET ROYALTY', desc: '+20% mission reward multiplier at all times' },
+      { name: 'LEADERSHIP AURA', desc: 'Crew members deal 15% more damage nearby' },
     ],
-    bio: 'Born in the trenches. Built for the throne. The movement starts with him.',
+    stats: [
+      { label: 'HUSTLE',    value: 95 },
+      { label: 'INFLUENCE', value: 98 },
+      { label: 'LOYALTY',   value: 100 },
+      { label: 'STREET',    value: 92 },
+    ],
+    bio: 'Born in the trenches of Baton Rouge, built for the throne. He controls the story — the movement starts and ends with him.',
   },
   {
     id: 'quando',
     name: 'QUANDO',
-    title: 'THE ENFORCER',
+    fullName: 'QUANDO RONDO',
+    title: 'TERRITORY GENERAL',
+    tagline: 'COLD WORLD',
     image: '/quando.png',
     accentColor: '#ff2244',
-    glowColor: '#ff224455',
-    abilities: ['Trap General', 'Cold World', 'Iron Grip'],
+    bgColor: '#1a0005',
+    abilities: [
+      { name: 'TRAP EMPIRE', desc: 'Unlock trap income points across the map' },
+      { name: 'GHOST MODE', desc: 'Reduces wanted level stars instantly' },
+      { name: 'IRON GRIP', desc: 'Territory once claimed cannot be contested' },
+    ],
     stats: [
-      { label: 'STREET',   value: 100 },
+      { label: 'HUSTLE',    value: 92 },
       { label: 'INFLUENCE', value: 72 },
       { label: 'LOYALTY',   value: 85 },
-      { label: 'HUSTLE',    value: 92 },
+      { label: 'STREET',    value: 100 },
     ],
-    bio: 'Ice cold under pressure. The streets forged him into something different.',
+    bio: 'Ice cold under pressure. The streets forged him into something different. Quando runs territory — quietly and completely.',
   },
   {
     id: 'lultimm',
     name: 'LUL TIMM',
-    title: 'THE LEGEND',
+    fullName: 'LUL TIMM',
+    title: 'ICON & FAME MASTER',
+    tagline: 'PLATINUM TOUCH',
     image: '/lultimm.png',
     accentColor: '#00f0d0',
-    glowColor: '#00f0d055',
-    abilities: ['Icon Status', 'Alien Flow', 'Platinum Touch'],
+    bgColor: '#001a18',
+    abilities: [
+      { name: 'PLATINUM SESSION', desc: '10x fame multiplier in studio sessions' },
+      { name: 'VIRAL MOMENT', desc: 'Instantly boost crew reputation citywide' },
+      { name: 'DRIP DROP', desc: 'Access exclusive gear drops unavailable elsewhere' },
+    ],
     stats: [
-      { label: 'STREET',   value: 82 },
+      { label: 'HUSTLE',    value: 96 },
       { label: 'INFLUENCE', value: 100 },
       { label: 'LOYALTY',   value: 78 },
-      { label: 'HUSTLE',    value: 96 },
+      { label: 'STREET',    value: 82 },
     ],
-    bio: 'Unmatched creativity. Built a legacy that transcends the streets.',
+    bio: 'Unmatched creativity. Transcends the streets through music, drip, and influence. One session with Lul Timm changes everything.',
   },
 ];
+
+const CSS = `
+  @keyframes nba-float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes nba-slide-in-right {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes nba-slide-in-up {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes nba-stat-fill {
+    from { width: 0%; }
+    to { width: var(--stat-w); }
+  }
+  @keyframes nba-pulse-border {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  @keyframes nba-scan {
+    0% { top: -2px; }
+    100% { top: 100%; }
+  }
+  @keyframes nba-grain {
+    0%, 100% { transform: translate(0,0); }
+    10% { transform: translate(-2%,-2%); }
+    20% { transform: translate(2%,-1%); }
+    30% { transform: translate(-1%,2%); }
+    40% { transform: translate(2%,1%); }
+    50% { transform: translate(-2%,1%); }
+    60% { transform: translate(1%,-2%); }
+    70% { transform: translate(-1%,2%); }
+    80% { transform: translate(2%,-1%); }
+    90% { transform: translate(-2%,2%); }
+  }
+  @keyframes nba-confirm-pulse {
+    0%, 100% { box-shadow: 0 0 20px var(--accent); }
+    50% { box-shadow: 0 0 40px var(--accent), 0 0 60px var(--accent-dim); }
+  }
+  @keyframes nba-portrait-reveal {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0% 0 0); }
+  }
+  @keyframes nba-shimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+`;
 
 interface Props {
   onDone: () => void;
@@ -71,195 +142,418 @@ interface Props {
 export function CharacterSelectScreen({ onDone }: Props) {
   const { dispatch } = useGame();
   const [selected, setSelected] = useState<string | null>(null);
-  const [hovered, setHovered] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string>(PLAYABLE[0].id);
   const [confirming, setConfirming] = useState(false);
+  const [panelKey, setPanelKey] = useState(0); // force re-animation on change
+  const [statsVisible, setStatsVisible] = useState(false);
+  const statsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const activeId = hovered ?? selected ?? PLAYABLE[0].id;
   const activeChar = PLAYABLE.find(c => c.id === activeId)!;
 
-  const handleConfirm = () => {
-    if (!selected) return;
-    setConfirming(true);
-    dispatch({ type: 'SET_PLAYER_CHARACTER', characterId: selected });
-    setTimeout(onDone, 600);
+  const handleSelect = (id: string) => {
+    if (id === activeId) return;
+    setActiveId(id);
+    setSelected(id);
+    setPanelKey(k => k + 1);
+    setStatsVisible(false);
+    if (statsTimeout.current) clearTimeout(statsTimeout.current);
+    statsTimeout.current = setTimeout(() => setStatsVisible(true), 200);
   };
 
+  const handleConfirm = () => {
+    const id = selected ?? activeId;
+    setConfirming(true);
+    dispatch({ type: 'SET_PLAYER_CHARACTER', characterId: id });
+    setTimeout(onDone, 800);
+  };
+
+  useEffect(() => {
+    const t = setTimeout(() => setStatsVisible(true), 400);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
-      style={{
-        background: 'radial-gradient(ellipse at 50% 20%, #0a0218 0%, #000005 100%)',
-        fontFamily: "'Roboto Mono', monospace",
-      }}
-    >
-      {/* Scanline overlay */}
+    <>
+      <style>{CSS}</style>
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="fixed inset-0 z-50 overflow-hidden select-none"
         style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,240,208,0.025) 2px, rgba(0,240,208,0.025) 4px)',
+          background: '#000',
+          fontFamily: "'Roboto Mono', monospace",
         }}
-      />
+      >
+        {/* ── Animated background ── */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(ellipse 80% 60% at 35% 50%, ${activeChar.bgColor} 0%, #000 65%)`,
+            transition: 'background 0.6s ease',
+          }}
+        />
+        {/* Film grain */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.035]"
+          style={{
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
+            backgroundSize: '180px 180px',
+            animation: 'nba-grain 0.15s steps(1) infinite',
+          }}
+        />
+        {/* Scanline */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.18) 3px, rgba(0,0,0,0.18) 4px)',
+          }}
+        />
 
-      {/* Header */}
-      <div className="relative text-center mb-8 z-10">
-        <p className="text-[9px] tracking-[0.6em] text-cyan-400/60 mb-1">STREET CHRONICLES EMPIRE</p>
-        <h1
-          className="font-display text-4xl md:text-5xl font-black tracking-[0.15em] mb-1"
-          style={{ color: '#fff', textShadow: '0 0 40px #00f0d0, 0 0 80px #00f0d055' }}
-        >
-          SELECT YOUR LEGEND
-        </h1>
-        <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${activeChar.accentColor}, transparent)`, marginTop: 8 }} />
-      </div>
-
-      {/* Character cards */}
-      <div className="relative z-10 flex gap-4 md:gap-6 mb-8 px-4">
-        {PLAYABLE.map(char => {
-          const isActive = char.id === activeId;
-          const isSelected = char.id === selected;
-          return (
-            <button
-              key={char.id}
-              className="relative flex flex-col items-center cursor-pointer transition-all duration-300 focus:outline-none"
+        {/* ── Top bar ── */}
+        <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-4">
+          <div>
+            <div className="text-[9px] tracking-[0.5em] text-white/30 mb-0.5">ATLANTIS CITY</div>
+            <div
+              className="text-[11px] font-black tracking-[0.35em]"
               style={{
-                transform: isActive ? 'scale(1.06) translateY(-6px)' : 'scale(0.97)',
-                filter: isActive ? 'drop-shadow(0 0 24px ' + char.accentColor + '88)' : 'brightness(0.55)',
+                background: `linear-gradient(90deg, ${activeChar.accentColor}, #fff)`,
+                backgroundSize: '200% auto',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                animation: 'nba-shimmer 3s linear infinite',
               }}
-              onMouseEnter={() => setHovered(char.id)}
-              onMouseLeave={() => setHovered(null)}
-              onClick={() => setSelected(char.id)}
             >
-              {/* Card frame */}
+              NEVER BROKE AGAIN
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-[9px] tracking-[0.4em] text-white/30">CHAPTER SELECT</div>
+            <div className="text-[9px] tracking-[0.4em]" style={{ color: activeChar.accentColor }}>
+              {PLAYABLE.findIndex(c => c.id === activeId) + 1} / {PLAYABLE.length}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Accent horizontal lines ── */}
+        <div className="absolute top-16 left-0 right-0 h-px pointer-events-none"
+          style={{ background: `linear-gradient(90deg, transparent, ${activeChar.accentColor}44, transparent)`, transition: 'background 0.4s' }} />
+
+        {/* ── Main layout: portrait left + info right ── */}
+        <div className="absolute inset-0 flex" style={{ paddingTop: 64 }}>
+
+          {/* LEFT — large portrait */}
+          <div
+            className="relative flex-shrink-0"
+            style={{ width: '48%', height: '100%' }}
+          >
+            {/* Character name behind portrait */}
+            <div
+              className="absolute bottom-0 left-0 right-0 pointer-events-none"
+              style={{ zIndex: 1 }}
+            >
               <div
-                className="relative overflow-hidden"
+                className="font-black leading-none px-8 pb-4"
                 style={{
-                  width: 170,
-                  border: `2px solid ${isActive ? char.accentColor : '#333'}`,
-                  background: isActive ? `linear-gradient(180deg, #0a0a1a, #050510)` : '#07070e',
-                  boxShadow: isActive ? `0 0 32px ${char.glowColor}, inset 0 0 20px ${char.glowColor}` : 'none',
+                  fontSize: 'clamp(48px, 7vw, 88px)',
+                  color: activeChar.accentColor,
+                  opacity: 0.12,
+                  letterSpacing: '0.08em',
+                  filter: 'blur(1px)',
                 }}
               >
-                {/* Character portrait */}
-                <div className="relative" style={{ height: 220, overflow: 'hidden', background: `radial-gradient(ellipse at 50% 60%, ${char.glowColor} 0%, transparent 70%)` }}>
-                  <img
-                    src={char.image}
-                    alt={char.name}
+                {activeChar.name}
+              </div>
+            </div>
+
+            {/* Portrait image */}
+            {PLAYABLE.map(char => (
+              <div
+                key={char.id}
+                className="absolute inset-0"
+                style={{
+                  opacity: char.id === activeId ? 1 : 0,
+                  transition: 'opacity 0.45s ease',
+                  zIndex: 2,
+                }}
+              >
+                <img
+                  src={char.image}
+                  alt={char.name}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'top center',
+                    filter: `drop-shadow(0 0 40px ${char.accentColor}55)`,
+                  }}
+                />
+                {/* Bottom gradient */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 pointer-events-none"
+                  style={{
+                    height: '55%',
+                    background: 'linear-gradient(to top, #000 0%, transparent 100%)',
+                    zIndex: 3,
+                  }}
+                />
+              </div>
+            ))}
+
+            {/* Character selector thumbnails — bottom of portrait */}
+            <div
+              className="absolute bottom-6 left-0 right-0 flex gap-3 px-8 z-10"
+              style={{ zIndex: 10 }}
+            >
+              {PLAYABLE.map((char, i) => {
+                const isActive = char.id === activeId;
+                return (
+                  <button
+                    key={char.id}
+                    onClick={() => handleSelect(char.id)}
+                    className="relative flex-1 overflow-hidden transition-all duration-200 focus:outline-none"
                     style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      objectPosition: 'top center',
+                      height: 80,
+                      border: `2px solid ${isActive ? char.accentColor : '#333'}`,
+                      background: isActive ? `${char.accentColor}15` : '#0a0a0a',
+                      transform: isActive ? 'scale(1.05)' : 'scale(0.98)',
+                      boxShadow: isActive ? `0 0 18px ${char.accentColor}66` : 'none',
                     }}
-                  />
-                  {/* Gradient overlay at bottom */}
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: 'linear-gradient(transparent, #050510)' }} />
-                </div>
-
-                {/* Name area */}
-                <div className="px-3 py-3 text-center">
-                  <div className="text-xs font-bold tracking-[0.25em]" style={{ color: char.accentColor }}>
-                    {char.name}
-                  </div>
-                  <div className="text-[8px] tracking-widest mt-0.5" style={{ color: '#888' }}>
-                    {char.title}
-                  </div>
-                </div>
-
-                {/* Corner brackets */}
-                {isActive && (
-                  <>
-                    <div style={{ position: 'absolute', top: 4, left: 4, width: 12, height: 12, borderTop: `2px solid ${char.accentColor}`, borderLeft: `2px solid ${char.accentColor}` }} />
-                    <div style={{ position: 'absolute', top: 4, right: 4, width: 12, height: 12, borderTop: `2px solid ${char.accentColor}`, borderRight: `2px solid ${char.accentColor}` }} />
-                    <div style={{ position: 'absolute', bottom: 4, left: 4, width: 12, height: 12, borderBottom: `2px solid ${char.accentColor}`, borderLeft: `2px solid ${char.accentColor}` }} />
-                    <div style={{ position: 'absolute', bottom: 4, right: 4, width: 12, height: 12, borderBottom: `2px solid ${char.accentColor}`, borderRight: `2px solid ${char.accentColor}` }} />
-                  </>
-                )}
-
-                {/* Selected indicator */}
-                {isSelected && (
-                  <div
-                    className="absolute top-2 left-1/2 -translate-x-1/2 text-[7px] tracking-[0.3em] px-2 py-0.5 font-bold"
-                    style={{ background: char.accentColor, color: '#000' }}
                   >
-                    SELECTED
+                    <img
+                      src={char.image}
+                      alt={char.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        objectPosition: 'top center',
+                        filter: isActive ? 'none' : 'grayscale(60%) brightness(0.5)',
+                        transition: 'filter 0.3s',
+                      }}
+                    />
+                    <div
+                      className="absolute bottom-0 left-0 right-0 text-center py-1"
+                      style={{
+                        background: 'linear-gradient(transparent, rgba(0,0,0,0.85))',
+                        fontSize: 8,
+                        fontWeight: 900,
+                        letterSpacing: '0.25em',
+                        color: isActive ? char.accentColor : '#666',
+                      }}
+                    >
+                      {char.name}
+                    </div>
+                    {isActive && (
+                      <div
+                        className="absolute bottom-0 left-0 right-0 h-0.5"
+                        style={{ background: char.accentColor, animation: 'nba-pulse-border 1.5s ease-in-out infinite' }}
+                      />
+                    )}
+                    {/* Number badge */}
+                    <div
+                      className="absolute top-1.5 left-1.5 text-[8px] font-bold px-1"
+                      style={{
+                        background: isActive ? char.accentColor : '#222',
+                        color: isActive ? '#000' : '#555',
+                      }}
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Left accent line */}
+            <div
+              className="absolute top-0 bottom-0 right-0 w-px pointer-events-none"
+              style={{
+                background: `linear-gradient(to bottom, transparent, ${activeChar.accentColor}44 20%, ${activeChar.accentColor}88 50%, ${activeChar.accentColor}44 80%, transparent)`,
+                transition: 'background 0.4s',
+                zIndex: 15,
+              }}
+            />
+          </div>
+
+          {/* RIGHT — character info */}
+          <div
+            key={panelKey}
+            className="flex-1 flex flex-col justify-center px-10 py-8 overflow-hidden"
+            style={{ animation: 'nba-slide-in-right 0.4s ease forwards' }}
+          >
+            {/* Title line */}
+            <div className="mb-6">
+              <div
+                className="text-[9px] tracking-[0.55em] mb-2 font-bold"
+                style={{ color: activeChar.accentColor, opacity: 0.8 }}
+              >
+                {activeChar.title}
+              </div>
+              <h2
+                className="font-black leading-none mb-1"
+                style={{
+                  fontSize: 'clamp(38px, 5.5vw, 68px)',
+                  color: '#fff',
+                  letterSpacing: '0.04em',
+                  textShadow: `0 0 40px ${activeChar.accentColor}66`,
+                }}
+              >
+                {activeChar.fullName}
+              </h2>
+              <div
+                className="text-[10px] tracking-[0.4em] font-bold mt-1"
+                style={{ color: activeChar.accentColor }}
+              >
+                "{activeChar.tagline}"
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div style={{ height: 1, background: `linear-gradient(90deg, ${activeChar.accentColor}66, transparent)`, marginBottom: 20 }} />
+
+            {/* Bio */}
+            <p
+              className="text-sm leading-relaxed mb-6"
+              style={{ color: '#aaa', maxWidth: 440, fontSize: 12 }}
+            >
+              {activeChar.bio}
+            </p>
+
+            {/* Stats */}
+            <div className="mb-6">
+              <div className="text-[9px] tracking-[0.5em] mb-3 font-bold" style={{ color: activeChar.accentColor, opacity: 0.7 }}>
+                ATTRIBUTES
+              </div>
+              <div className="space-y-3" style={{ maxWidth: 400 }}>
+                {activeChar.stats.map((s, i) => (
+                  <div key={s.label} style={{ animationDelay: `${i * 80}ms` }}>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-[9px] tracking-[0.35em] font-bold" style={{ color: '#666' }}>{s.label}</span>
+                      <span className="text-[10px] font-black" style={{ color: activeChar.accentColor }}>{s.value}</span>
+                    </div>
+                    <div className="relative h-1.5 rounded-none overflow-hidden" style={{ background: '#111' }}>
+                      <div
+                        className="absolute inset-y-0 left-0 rounded-none"
+                        style={{
+                          width: statsVisible ? `${s.value}%` : '0%',
+                          background: `linear-gradient(90deg, ${activeChar.accentColor}55 0%, ${activeChar.accentColor} 100%)`,
+                          transition: `width 0.7s cubic-bezier(0.22, 1, 0.36, 1) ${i * 80}ms`,
+                          boxShadow: `0 0 8px ${activeChar.accentColor}88`,
+                        }}
+                      />
+                      {/* Tick marks */}
+                      {[25, 50, 75].map(tick => (
+                        <div
+                          key={tick}
+                          className="absolute inset-y-0 w-px"
+                          style={{ left: `${tick}%`, background: '#222', zIndex: 2 }}
+                        />
+                      ))}
+                    </div>
                   </div>
-                )}
+                ))}
               </div>
-            </button>
-          );
-        })}
-      </div>
+            </div>
 
-      {/* Active character detail panel */}
-      <div
-        className="relative z-10 flex gap-8 items-start px-6 mb-8 w-full max-w-3xl"
-        style={{ borderTop: `1px solid ${activeChar.accentColor}33`, paddingTop: 20 }}
-      >
-        {/* Bio + abilities */}
-        <div className="flex-1">
-          <p className="text-[9px] tracking-widest mb-2" style={{ color: activeChar.accentColor }}>BACKGROUND</p>
-          <p className="text-xs text-gray-400 leading-relaxed mb-4">{activeChar.bio}</p>
-          <p className="text-[9px] tracking-widest mb-2" style={{ color: activeChar.accentColor }}>ABILITIES</p>
-          <div className="space-y-1">
-            {activeChar.abilities.map(a => (
-              <div key={a} className="flex items-center gap-2">
-                <div className="w-1 h-1 rounded-full" style={{ background: activeChar.accentColor }} />
-                <span className="text-[10px] tracking-wider text-gray-300">{a}</span>
+            {/* Abilities */}
+            <div className="mb-8">
+              <div className="text-[9px] tracking-[0.5em] mb-3 font-bold" style={{ color: activeChar.accentColor, opacity: 0.7 }}>
+                ABILITIES
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="flex-1">
-          <p className="text-[9px] tracking-widest mb-3" style={{ color: activeChar.accentColor }}>ATTRIBUTES</p>
-          <div className="space-y-2.5">
-            {activeChar.stats.map(s => (
-              <div key={s.label}>
-                <div className="flex justify-between mb-0.5">
-                  <span className="text-[9px] tracking-widest text-gray-500">{s.label}</span>
-                  <span className="text-[9px]" style={{ color: activeChar.accentColor }}>{s.value}</span>
-                </div>
-                <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
+              <div className="space-y-2" style={{ maxWidth: 440 }}>
+                {activeChar.abilities.map((a, i) => (
                   <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${s.value}%`, background: `linear-gradient(90deg, ${activeChar.accentColor}88, ${activeChar.accentColor})` }}
-                  />
-                </div>
+                    key={a.name}
+                    className="flex items-start gap-3 px-3 py-2.5"
+                    style={{
+                      background: `${activeChar.accentColor}08`,
+                      borderLeft: `2px solid ${activeChar.accentColor}44`,
+                      animation: `nba-slide-in-up 0.35s ease forwards`,
+                      animationDelay: `${i * 60 + 100}ms`,
+                      opacity: 0,
+                    }}
+                  >
+                    <div
+                      className="mt-0.5 flex-shrink-0 w-4 h-4 flex items-center justify-center text-[8px] font-black"
+                      style={{ background: activeChar.accentColor, color: '#000' }}
+                    >
+                      {i + 1}
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-bold tracking-wider mb-0.5" style={{ color: '#fff' }}>{a.name}</div>
+                      <div className="text-[9px] leading-relaxed" style={{ color: '#666' }}>{a.desc}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Confirm button */}
+            <div>
+              <button
+                onClick={handleConfirm}
+                disabled={confirming}
+                className="relative group overflow-hidden px-10 py-4 font-black tracking-[0.35em] text-sm transition-all duration-200 focus:outline-none disabled:opacity-50"
+                style={{
+                  ['--accent' as string]: activeChar.accentColor,
+                  ['--accent-dim' as string]: activeChar.accentColor + '55',
+                  background: confirming ? `${activeChar.accentColor}22` : `linear-gradient(135deg, ${activeChar.accentColor}22, ${activeChar.accentColor}44)`,
+                  border: `2px solid ${activeChar.accentColor}`,
+                  color: activeChar.accentColor,
+                  animation: 'nba-confirm-pulse 2s ease-in-out infinite',
+                  minWidth: 260,
+                }}
+              >
+                {/* Hover shimmer */}
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200"
+                  style={{ background: `linear-gradient(135deg, ${activeChar.accentColor}15, ${activeChar.accentColor}30)` }}
+                />
+                <span className="relative z-10">
+                  {confirming ? 'ENTERING THE WORLD...' : `ENTER AS ${activeChar.name}`}
+                </span>
+              </button>
+
+              <div className="mt-3 text-[8px] tracking-[0.45em] text-white/20">
+                CLICK A CHARACTER THUMBNAIL TO SWITCH • CONFIRM TO START
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* CTA */}
-      <div className="relative z-10 flex flex-col items-center gap-3">
-        <button
-          onClick={handleConfirm}
-          disabled={!selected || confirming}
-          className="relative px-12 py-3 text-sm font-bold tracking-[0.3em] transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+        {/* ── Bottom accent bar ── */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-0.5 pointer-events-none"
           style={{
-            background: selected ? `linear-gradient(135deg, ${activeChar.accentColor}22, ${activeChar.accentColor}44)` : 'transparent',
-            border: `2px solid ${selected ? activeChar.accentColor : '#333'}`,
-            color: selected ? activeChar.accentColor : '#555',
-            boxShadow: selected ? `0 0 20px ${activeChar.glowColor}` : 'none',
+            background: `linear-gradient(90deg, transparent, ${activeChar.accentColor}55, transparent)`,
+            transition: 'background 0.4s',
           }}
-        >
-          {confirming ? 'ENTERING THE WORLD...' : selected ? `ENTER AS ${PLAYABLE.find(c => c.id === selected)?.name}` : 'SELECT A CHARACTER'}
-        </button>
-        {!selected && (
-          <p className="text-[9px] text-gray-600 tracking-widest animate-pulse">CLICK A CHARACTER ABOVE TO SELECT</p>
-        )}
-      </div>
+        />
 
-      {/* Background city silhouette */}
-      <div
-        className="absolute bottom-0 left-0 right-0 pointer-events-none"
-        style={{
-          height: 120,
-          background: 'linear-gradient(transparent, #000008)',
-        }}
-      />
-    </div>
+        {/* ── Corner marks (GTA-style) ── */}
+        {[
+          { top: 8, left: 8, borderTop: true, borderLeft: true },
+          { top: 8, right: 8, borderTop: true, borderRight: true },
+          { bottom: 8, left: 8, borderBottom: true, borderLeft: true },
+          { bottom: 8, right: 8, borderBottom: true, borderRight: true },
+        ].map((c, i) => (
+          <div
+            key={i}
+            className="absolute pointer-events-none"
+            style={{
+              top: c.top,
+              left: (c as any).left,
+              right: (c as any).right,
+              bottom: c.bottom,
+              width: 20,
+              height: 20,
+              borderTop: c.borderTop ? `2px solid ${activeChar.accentColor}66` : undefined,
+              borderBottom: c.borderBottom ? `2px solid ${activeChar.accentColor}66` : undefined,
+              borderLeft: c.borderLeft ? `2px solid ${activeChar.accentColor}66` : undefined,
+              borderRight: c.borderRight ? `2px solid ${activeChar.accentColor}66` : undefined,
+              transition: 'border-color 0.4s',
+            }}
+          />
+        ))}
+      </div>
+    </>
   );
 }

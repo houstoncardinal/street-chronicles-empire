@@ -1,0 +1,206 @@
+# Blender 4.1.1 MTL File: 'KB3D_City Bus.blend'
+# www.blender.org
+
+newmtl KB3D_CMV_BusADVAtlas
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_BusADVAtlas_basecolor.jpg
+map_Ns KB3D_CMV_BusADVAtlas_roughness.jpg
+map_refl KB3D_CMV_BusADVAtlas_metallic.jpg
+map_Ke KB3D_CMV_BusADVAtlas_emissive.jpg
+map_Bump -bm 1.000000 KB3D_CMV_BusADVAtlas_normal.jpg
+
+newmtl KB3D_CMV_CityBusBodyExteriorDetails
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_CityBusBodyExteriorDetails_basecolor.jpg
+map_Ns KB3D_CMV_CityBusBodyExteriorDetails_roughness.jpg
+map_refl KB3D_CMV_CityBusBodyExteriorDetails_metallic.jpg
+map_Ke KB3D_CMV_CityBusBodyExteriorDetails_emissive.jpg
+map_Bump -bm 1.000000 KB3D_CMV_CityBusBodyExteriorDetails_normal.jpg
+
+newmtl KB3D_CMV_CityBusBodyExteriorTrim
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_CityBusBodyExteriorTrim_basecolor.jpg
+map_Ns KB3D_CMV_CityBusBodyExteriorTrim_roughness.jpg
+map_refl KB3D_CMV_CityBusBodyExteriorTrim_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_CityBusBodyExteriorTrim_normal.jpg
+
+newmtl KB3D_CMV_CityBusBodyInteriorDetails
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_CityBusBodyInteriorDetails_basecolor.jpg
+map_Ns KB3D_CMV_CityBusBodyInteriorDetails_roughness.jpg
+map_refl KB3D_CMV_CityBusBodyInteriorDetails_metallic.jpg
+map_Ke KB3D_CMV_CityBusBodyInteriorDetails_emissive.jpg
+map_Bump -bm 1.000000 KB3D_CMV_CityBusBodyInteriorDetails_normal.jpg
+
+newmtl KB3D_CMV_CityBusBodyInteriorTrim
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_CityBusBodyInteriorTrim_basecolor.jpg
+map_Ns KB3D_CMV_CityBusBodyInteriorTrim_roughness.jpg
+map_refl KB3D_CMV_CityBusBodyInteriorTrim_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_CityBusBodyInteriorTrim_normal.jpg
+
+newmtl KB3D_CMV_DecalsCityBus
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd KB3D_CMV_DecalsCityBus_basecolor.jpg
+map_Ns KB3D_CMV_DecalsCityBus_roughness.jpg
+map_refl KB3D_CMV_DecalsCityBus_metallic.jpg
+map_d KB3D_CMV_DecalsCityBus_opacity.jpg
+map_Bump -bm 1.000000 KB3D_CMV_DecalsCityBus_normal.jpg
+
+newmtl KB3D_CMV_MetalPaintBlackWorn
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_MetalPaintBlackWorn_basecolor.jpg
+map_Ns KB3D_CMV_MetalPaintBlackWorn_roughness.jpg
+map_refl KB3D_CMV_MetalPaintBlackWorn_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_MetalPaintBlackWorn_normal.jpg
+
+newmtl KB3D_CMV_MetalPaintGrayTrim
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_MetalPaintGrayTrim_basecolor.jpg
+map_Ns KB3D_CMV_MetalPaintGrayTrim_roughness.jpg
+map_refl KB3D_CMV_MetalPaintGrayTrim_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_MetalPaintGrayTrim_normal.jpg
+
+newmtl KB3D_CMV_PlasticGray
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_PlasticGray_basecolor.jpg
+map_Ns KB3D_CMV_PlasticGray_roughness.jpg
+map_refl KB3D_CMV_PlasticGray_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_PlasticGray_normal.jpg
+
+newmtl KB3D_CMV_RubberTrim
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_RubberTrim_basecolor.jpg
+map_Ns KB3D_CMV_RubberTrim_roughness.jpg
+map_refl KB3D_CMV_RubberTrim_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_RubberTrim_normal.jpg
+
+newmtl KB3D_CMV_SeatsBusesPassengerTrim
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_SeatsBusesPassengerTrim_basecolor.jpg
+map_Ns KB3D_CMV_SeatsBusesPassengerTrim_roughness.jpg
+map_refl KB3D_CMV_SeatsBusesPassengerTrim_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_SeatsBusesPassengerTrim_normal.jpg
+
+newmtl KB3D_CMV_SeatsDriverATrim
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_SeatsDriverATrim_basecolor.jpg
+map_Ns KB3D_CMV_SeatsDriverATrim_roughness.jpg
+map_refl KB3D_CMV_SeatsDriverATrim_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_SeatsDriverATrim_normal.jpg
+
+newmtl KB3D_CMV_SteelWorn
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_SteelWorn_basecolor.jpg
+map_Ns KB3D_CMV_SteelWorn_roughness.jpg
+map_refl KB3D_CMV_SteelWorn_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_SteelWorn_normal.jpg
+
+newmtl KB3D_CMV_TapesTrimA
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd KB3D_CMV_TapesTrimA_basecolor.jpg
+map_Ns KB3D_CMV_TapesTrimA_roughness.jpg
+map_refl KB3D_CMV_TapesTrimA_metallic.jpg
+map_d KB3D_CMV_TapesTrimA_opacity.jpg
+map_Bump -bm 1.000000 KB3D_CMV_TapesTrimA_normal.jpg
+
+newmtl KB3D_CMV_TiresMedium
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_TiresMedium_basecolor.jpg
+map_Ns KB3D_CMV_TiresMedium_roughness.jpg
+map_refl KB3D_CMV_TiresMedium_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_TiresMedium_normal.jpg
+
+newmtl KB3D_CMV_TranslElemCBus
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.500000
+illum 2
+map_Kd KB3D_CMV_TranslElemCBus_basecolor.jpg
+map_Ns KB3D_CMV_TranslElemCBus_roughness.jpg
+map_refl KB3D_CMV_TranslElemCBus_metallic.jpg
+map_Ke KB3D_CMV_TranslElemCBus_emissive.jpg
+map_d KB3D_CMV_TranslElemCBus_opacity.jpg
+map_Bump -bm 1.000000 KB3D_CMV_TranslElemCBus_normal.jpg
+
+newmtl KB3D_CMV_UndercarriageTrim
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd KB3D_CMV_UndercarriageTrim_basecolor.jpg
+map_Ns KB3D_CMV_UndercarriageTrim_roughness.jpg
+map_refl KB3D_CMV_UndercarriageTrim_metallic.jpg
+map_Bump -bm 1.000000 KB3D_CMV_UndercarriageTrim_normal.jpg

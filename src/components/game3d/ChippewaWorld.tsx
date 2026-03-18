@@ -52,6 +52,43 @@ const SIDEWALK_TAN   = '#9a8870';
 const BRICK_WALK     = '#8a7460';
 const CURB           = '#6a6860';
 
+// ── Procedural road texture (asphalt grain + aggregate) ───────────────────
+function makeRoadTexture(): THREE.CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 512;
+  const ctx = c.getContext('2d')!;
+  ctx.fillStyle = '#1c1c22';
+  ctx.fillRect(0, 0, 512, 512);
+  // Fine grain
+  for (let i = 0; i < 7000; i++) {
+    const v = 24 + Math.random() * 20;
+    ctx.fillStyle = `rgba(${v},${v},${v + 2},${0.35 + Math.random() * 0.45})`;
+    ctx.fillRect(Math.random() * 512, Math.random() * 512, Math.random() * 2.5 + 0.5, 1);
+  }
+  // Aggregate flecks (light-coloured stones in asphalt)
+  for (let i = 0; i < 500; i++) {
+    const v = 55 + Math.random() * 45;
+    ctx.fillStyle = `rgba(${v},${v},${v - 3},0.28)`;
+    ctx.beginPath();
+    ctx.arc(Math.random() * 512, Math.random() * 512, 0.6 + Math.random() * 1.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Hairline cracks
+  for (let i = 0; i < 10; i++) {
+    ctx.strokeStyle = `rgba(55,55,62,${0.25 + Math.random() * 0.3})`;
+    ctx.lineWidth   = Math.random() * 1.2 + 0.3;
+    ctx.beginPath();
+    const sx = Math.random() * 512, sy = Math.random() * 512;
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx + (Math.random() - 0.5) * 160, sy + (Math.random() - 0.5) * 120);
+    ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(14, 3);
+  return tex;
+}
+
 // ── Box Helper ────────────────────────────────────────────────────────────
 function Box({ pos, size, color, metalness = 0.04, roughness = 0.88,
   castShadow = true, receiveShadow = false, emissive, emissiveIntensity = 0 }:
@@ -1305,14 +1342,73 @@ function DayNightSystem() {
         <meshBasicMaterial color="#e8eeff" />
       </mesh>
 
-      {/* Lights */}
-      <ambientLight ref={ambientRef} color="#e8d8c8" intensity={2.0} />
-      <directionalLight ref={sunRef} color="#fff8e0" intensity={4.2}
+      {/* Lights — warm bayou sun, cooler fill, ground bounce */}
+      <ambientLight ref={ambientRef} color="#ead4b8" intensity={2.2} />
+      <directionalLight ref={sunRef} color="#fff4d8" intensity={4.8}
         position={[80, 100, -20]} castShadow={false} />
-      <directionalLight ref={moonRef} color="#c8d8ff" intensity={0}
+      <directionalLight ref={moonRef} color="#b8ccff" intensity={0}
         position={[-80, 120, 60]} castShadow={false} />
-      <hemisphereLight ref={hemiRef} args={['#87aad8', '#6a5a3a', 0.5]} />
+      {/* Hemisphere: warm sky above, golden-green ground bounce below */}
+      <hemisphereLight ref={hemiRef} args={['#88aad8', '#7a6030', 0.65]} />
     </>
+  );
+}
+
+// ── Realistic road markings ────────────────────────────────────────────────
+// Chippewa Blvd: 4 lanes (2 each direction), east-west along x-axis.
+// Road spans z = -9.15 to +9.15 (18.3 units wide). Center at z = 0.
+function RoadMarkings() {
+  const laneZ  = [-3, 3] as const;
+  const dashXs: number[] = [];
+  for (let x = -62; x <= 62; x += 5) dashXs.push(x);
+  const CROSSWALK_X = [-30, 0, 30, 62] as const;
+  const CW_D = 1.80, CW_STRIPES = 7;
+
+  return (
+    <group>
+      {/* White dashed lane dividers at z=±3 */}
+      {laneZ.map(lz =>
+        dashXs.map((x, i) => (
+          <mesh key={`ld-${lz}-${i}`} position={[x, 0.028, lz]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[2.4, 0.16]} />
+            <meshBasicMaterial color="#d8d8cc" transparent opacity={0.88} />
+          </mesh>
+        ))
+      )}
+      {/* Solid white edge lines */}
+      {([-8.7, 8.7] as const).map((z, i) => (
+        <mesh key={`el-${i}`} position={[0, 0.028, z]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[130, 0.18]} />
+          <meshBasicMaterial color="#d0d0c8" transparent opacity={0.80} />
+        </mesh>
+      ))}
+      {/* Brighter center double-yellow */}
+      {([-0.14, 0.14] as const).map((zOff, i) => (
+        <mesh key={`cy-${i}`} position={[0, 0.030, zOff]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[130, 0.15]} />
+          <meshBasicMaterial color="#e8c800" transparent opacity={0.90} />
+        </mesh>
+      ))}
+      {/* Crosswalk stripes */}
+      {CROSSWALK_X.map(cx =>
+        Array.from({ length: CW_STRIPES }, (_, i) => {
+          const z = -((CW_STRIPES - 1) / 2) * (CW_D + 0.22) + i * (CW_D + 0.22);
+          return (
+            <mesh key={`cw-${cx}-${i}`} position={[cx, 0.028, z]} rotation={[-Math.PI / 2, 0, 0]}>
+              <planeGeometry args={[0.80, CW_D]} />
+              <meshBasicMaterial color="#d4d4c6" transparent opacity={0.85} />
+            </mesh>
+          );
+        })
+      )}
+      {/* Stop bars before each crosswalk */}
+      {CROSSWALK_X.map(cx => (
+        <mesh key={`sb-${cx}`} position={[cx - 2.8, 0.029, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.42, 8.5]} />
+          <meshBasicMaterial color="#d4d4c6" transparent opacity={0.72} />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
@@ -1320,6 +1416,7 @@ function DayNightSystem() {
 // MAIN WORLD
 // ══════════════════════════════════════════════════════════════════════════
 export function ChippewaWorld() {
+  const roadTexture = useMemo(() => makeRoadTexture(), []);
   return (
     <>
       {/* ── Day/Night + Weather + Season (all-in-one) ── */}
@@ -1333,9 +1430,21 @@ export function ChippewaWorld() {
         {/* Expanded ground — covers entire city district (500×500) */}
         <mesh position={[20, 0, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
           <planeGeometry args={[500, 500]} />
-          <meshStandardMaterial color={ASPHALT} roughness={0.45} metalness={0.3} envMapIntensity={1.8} />
+          <meshStandardMaterial color={ASPHALT} roughness={0.55} metalness={0.18} />
         </mesh>
       </RigidBody>
+
+      {/* Detailed road surface with canvas grain texture — Chippewa Blvd only */}
+      <mesh position={[0, 0.004, 0]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[140, 18]} />
+        <meshStandardMaterial
+          color={ASPHALT}
+          map={roadTexture}
+          roughness={0.42}
+          metalness={0.10}
+          envMapIntensity={2.2}
+        />
+      </mesh>
 
       {/* ── Connector roads to new districts ── */}
       {/* North connector: Chippewa → Government St */}
@@ -1366,14 +1475,14 @@ export function ChippewaWorld() {
         <meshStandardMaterial color={GRASS_STRIP} roughness={0.96} />
       </mesh>
 
-      {/* Brick sidewalks */}
+      {/* Brick sidewalks — warmer tone, slight metalness for morning dew */}
       <mesh position={[0, 0.028, -11.8]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[130, 2.6]} />
-        <meshStandardMaterial color={BRICK_WALK} roughness={0.94} />
+        <meshStandardMaterial color={BRICK_WALK} roughness={0.88} metalness={0.04} />
       </mesh>
       <mesh position={[0, 0.028, 11.8]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[130, 2.6]} />
-        <meshStandardMaterial color={BRICK_WALK} roughness={0.94} />
+        <meshStandardMaterial color={BRICK_WALK} roughness={0.88} metalness={0.04} />
       </mesh>
       {/* Curbs */}
       <Box pos={[0, 0.06, -9.15]} size={[130, 0.12, 0.22]} color={CURB} roughness={0.88} castShadow={false} />
@@ -1391,22 +1500,8 @@ export function ChippewaWorld() {
         <meshStandardMaterial color={GRASS_YARD} roughness={0.97} />
       </mesh>
 
-      {/* Road lane lines */}
-      {[-20, -10, 10, 20].map((x, i) => (
-        <mesh key={i} position={[x, 0.025, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.20, 7]} />
-          <meshBasicMaterial color="#2e2e32" />
-        </mesh>
-      ))}
-      {/* Center double-yellow */}
-      <mesh position={[0, 0.026, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[120, 0.15]} />
-        <meshBasicMaterial color="#ccaa00" transparent opacity={0.5} />
-      </mesh>
-      <mesh position={[0.25, 0.026, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[120, 0.15]} />
-        <meshBasicMaterial color="#ccaa00" transparent opacity={0.5} />
-      </mesh>
+      {/* Proper road markings — lane dividers, crosswalks, stop bars */}
+      <RoadMarkings />
 
       {/* Rain — visible only during rain/storm weather */}
       <Rain />
