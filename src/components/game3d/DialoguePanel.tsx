@@ -83,11 +83,21 @@ export function DialoguePanel() {
             </p>
           </div>
 
+          {/* Purpose — what this character does for you */}
+          {'purpose' in character && (
+            <div className="mb-2 px-3 py-2 bg-secondary border-l-2" style={{ borderColor: character.visual.accentColor }}>
+              <div className="text-[8px] font-mono mb-1" style={{ color: character.visual.accentColor }}>
+                ROLE: {('specialization' in character ? (character as any).specialization : character.title)}
+              </div>
+              <p className="text-[8px] text-muted-foreground leading-relaxed">{(character as any).purpose}</p>
+            </div>
+          )}
+
           {/* Abilities */}
-          <div className="flex gap-2 mb-3">
+          <div className="flex flex-wrap gap-2 mb-3">
             {character.abilities.map(a => (
               <div key={a.name} className="text-[8px] px-2 py-1 bg-secondary border border-border text-muted-foreground">
-                {a.name}: {a.desc}
+                <span style={{ color: character.visual.accentColor }}>{a.name}:</span> {a.desc}
               </div>
             ))}
           </div>

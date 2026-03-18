@@ -706,21 +706,77 @@ const WEAPON_OFFSETS: Record<string, [number, number, number]> = {
   launcher: [0.14, -0.20, -0.50],
 };
 
-interface FirstPersonWeaponProps {
-  weaponId: string | null;
+// ─────────────────────────────────────────────────────────────────────────────
+// First-person arms — hoodie sleeves + visible forearms/hands
+// Two arms for two-handed weapons, right arm only for pistols/melee
+// ─────────────────────────────────────────────────────────────────────────────
+const HOODIE_COLOR  = '#111111';
+const SLEEVE_CUFF   = '#1e1e1e';
+const TWO_HANDED = new Set(['rifle', 'shotgun', 'smg', 'sniper', 'launcher']);
+
+function ArmMesh({ side, skinColor }: { side: 'right' | 'left'; skinColor: string }) {
+  const sx = side === 'right' ? 1 : -1;
+  // Arm runs from screen-edge toward the weapon grip area
+  // Group is oriented so Y-axis points along the forearm direction
+  const pos: [number, number, number] = [sx * 0.30, -0.52, -0.18];
+  const rot: [number, number, number] = [-0.68, sx * 0.28, sx * 0.16];
+  return (
+    <group position={pos} rotation={rot}>
+      {/* Hoodie sleeve — visible top portion */}
+      <mesh position={[0, 0.12, 0]}>
+        <cylinderGeometry args={[0.050, 0.055, 0.24, 9]} />
+        <meshStandardMaterial color={HOODIE_COLOR} roughness={0.82} />
+      </mesh>
+      {/* Sleeve end cuff ring */}
+      <mesh position={[0, -0.005, 0]}>
+        <cylinderGeometry args={[0.052, 0.052, 0.022, 9]} />
+        <meshStandardMaterial color={SLEEVE_CUFF} roughness={0.75} />
+      </mesh>
+      {/* Forearm skin */}
+      <mesh position={[0, -0.128, 0]}>
+        <cylinderGeometry args={[0.036, 0.044, 0.20, 9]} />
+        <meshStandardMaterial color={skinColor} roughness={0.70} />
+      </mesh>
+      {/* Wrist narrowing */}
+      <mesh position={[0, -0.244, 0]}>
+        <cylinderGeometry args={[0.030, 0.036, 0.058, 8]} />
+        <meshStandardMaterial color={skinColor} roughness={0.68} />
+      </mesh>
+      {/* Hand / fist block */}
+      <mesh position={[0, -0.296, 0]}>
+        <boxGeometry args={[0.065, 0.072, 0.082]} />
+        <meshStandardMaterial color={skinColor} roughness={0.65} />
+      </mesh>
+      {/* Thumb hint */}
+      <mesh position={[sx * 0.038, -0.282, 0.022]} rotation={[0, 0, sx * 0.65]}>
+        <cylinderGeometry args={[0.011, 0.014, 0.046, 6]} />
+        <meshStandardMaterial color={skinColor} roughness={0.65} />
+      </mesh>
+      {/* Knuckle ridge */}
+      <mesh position={[0, -0.322, 0.034]}>
+        <boxGeometry args={[0.062, 0.014, 0.022]} />
+        <meshStandardMaterial color={skinColor} roughness={0.60} />
+      </mesh>
+    </group>
+  );
 }
 
-export function FirstPersonWeapon({ weaponId }: FirstPersonWeaponProps) {
-  const groupRef = useRef<THREE.Group>(null);
+interface FirstPersonWeaponProps {
+  weaponId: string | null;
+  skinColor?: string;
+}
+
+export function FirstPersonWeapon({ weaponId, skinColor = '#8B5E3C' }: FirstPersonWeaponProps) {
+  const weaponGroupRef = useRef<THREE.Group>(null);
+  const armsGroupRef   = useRef<THREE.Group>(null);
   const { camera } = useThree();
   const weaponData = useMemo(() => getWeaponData(weaponId), [weaponId]);
   const recoilRef = useRef(0);
   const swayX = useRef(0);
   const swayY = useRef(0);
 
-  // Disable depth-test so weapon always renders over world geometry
-  useEffect(() => {
-    const grp = groupRef.current;
+  // depthTest=false + renderOrder=100 on all FP meshes
+  const applyFPRender = (grp: THREE.Group | null) => {
     if (!grp) return;
     grp.renderOrder = 100;
     grp.traverse(child => {
@@ -730,38 +786,59 @@ export function FirstPersonWeapon({ weaponId }: FirstPersonWeaponProps) {
         mats.forEach((m: THREE.Material) => { m.depthTest = false; });
       }
     });
-  }, [weaponId]);
+  };
+
+  useEffect(() => { applyFPRender(weaponGroupRef.current); }, [weaponId]);
+  useEffect(() => { applyFPRender(armsGroupRef.current); },  [skinColor]);
 
   useFrame((state, delta) => {
-    const grp = groupRef.current;
-    if (!grp) return;
+    const visible = cameraStore.mode === 'fp';
 
-    grp.visible = cameraStore.mode === 'fp' && weaponData.type !== 'none';
+    // Arms — always visible in FP regardless of weapon
+    const arms = armsGroupRef.current;
+    if (arms) {
+      arms.visible = visible;
+      if (visible) {
+        const t = state.clock.elapsedTime;
+        recoilRef.current = Math.max(0, recoilRef.current - delta * 14);
+        swayX.current = Math.sin(t * 1.5) * 0.0035 + Math.sin(t * 0.65) * 0.0015;
+        swayY.current = Math.cos(t * 1.1) * 0.0025;
+        const rc = recoilRef.current * 0.045;
+        // Arms sway in sync with weapon, slightly less extreme
+        arms.position.set(swayX.current * 0.7, swayY.current * 0.7 - rc, 0);
+        arms.rotation.set(-rc * 0.5, swayX.current * 1.2, 0);
+      }
+    }
+
+    // Weapon
+    const grp = weaponGroupRef.current;
+    if (!grp) return;
+    grp.visible = visible && weaponData.type !== 'none';
     if (!grp.visible) return;
 
     const t = state.clock.elapsedTime;
     swayX.current = Math.sin(t * 1.5) * 0.0035 + Math.sin(t * 0.65) * 0.0015;
     swayY.current = Math.cos(t * 1.1) * 0.0025;
-    recoilRef.current = Math.max(0, recoilRef.current - delta * 14);
     const rc = recoilRef.current * 0.055;
-
     const off = WEAPON_OFFSETS[weaponData.type] ?? WEAPON_OFFSETS.pistol;
-    grp.position.set(
-      off[0] + swayX.current,
-      off[1] + swayY.current - rc,
-      off[2],
-    );
-    grp.rotation.set(
-      -0.05 + recoilRef.current * 0.32,
-      swayX.current * 2.5,
-      0,
-    );
+    grp.position.set(off[0] + swayX.current, off[1] + swayY.current - rc, off[2]);
+    grp.rotation.set(-0.05 + recoilRef.current * 0.32, swayX.current * 2.5, 0);
   });
 
-  if (weaponData.type === 'none' || !weaponData.model) return null;
+  const twoHanded = TWO_HANDED.has(weaponData.type);
 
   return createPortal(
-    <group ref={groupRef}>{weaponData.model}</group>,
+    <>
+      {/* ── Arms (always visible in FP) ── */}
+      <group ref={armsGroupRef}>
+        <ArmMesh side="right" skinColor={skinColor} />
+        {twoHanded && <ArmMesh side="left" skinColor={skinColor} />}
+      </group>
+      {/* ── Weapon model ── */}
+      {weaponData.type !== 'none' && weaponData.model && (
+        <group ref={weaponGroupRef}>{weaponData.model}</group>
+      )}
+    </>,
     camera,
   );
 }

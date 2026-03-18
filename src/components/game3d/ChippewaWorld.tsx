@@ -5,12 +5,28 @@
  */
 import { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { weatherStore, applyWeather, WEATHER_CYCLE } from '@/stores/weatherStore';
+import { weatherStore, applyWeather, SEASON_WEATHER, SEASON_CYCLE, getSkyColors, getSunData } from '@/stores/weatherStore';
 import * as THREE from 'three';
 import { RigidBody } from '@react-three/rapier';
 import { Text } from '@react-three/drei';
 
-// ── Authentic Louisiana Palette ────────────────────────────────────────────
+// ── Luxury Palette ─────────────────────────────────────────────────────────
+const LUX_IVORY   = '#f4ede0';   // warm cream stucco
+const LUX_PEARL   = '#eee6d8';   // slightly warmer cream variant
+const LUX_SLATE   = '#e2dbd0';   // cool grey-cream variant
+const LUX_STONE   = '#c4bcb0';   // limestone / foundation
+const LUX_DARK    = '#0c0c14';   // near-black trim / frames
+const LUX_GLASS   = '#0d1a28';   // dark tinted glass
+const LUX_GOLD    = '#c4982a';   // brushed gold / brass
+const LUX_ROOF    = '#181820';   // charcoal flat roof
+const LUX_COLUMN  = '#f8f4ec';   // bright white columns
+const BRICK_DEEP  = '#6b3020';   // dark fired brick
+const BRICK_MID   = '#7e3c28';   // mid brick
+const MANOR_CREAM = '#ece4d4';   // manor cream trim
+const MANOR_ROOF  = '#1a1208';   // dark brown steep slate
+const DARK_GREEN  = '#172810';   // manicured hedge
+
+// ── Legacy Louisiana Palette (used by bars / trees / street elements) ──────
 const HOUSE_CREAM    = '#f0e0c0';
 const HOUSE_YELLOW   = '#e2cc88';
 const HOUSE_MINT     = '#b8ccb4';
@@ -159,130 +175,572 @@ function LiveOak({ x, z, scale = 1, seed = 0 }:
   );
 }
 
-// ── Shotgun House ──────────────────────────────────────────────────────────
-// Authentic Louisiana shotgun: narrow, long, raised high on brick piers,
-// front porch full width, wood siding planks, double-hung windows
-function ShotgunHouse({ x, z, rot = 0, wallColor = HOUSE_CREAM,
-  trimColor = TRIM_WHITE, roofColor = '#1c1408', hasLight = false, hasChimney = false }:
-  { x: number; z: number; rot?: number; wallColor?: string; trimColor?: string;
-    roofColor?: string; hasLight?: boolean; hasChimney?: boolean }) {
+// ── Luxury Mansion ─────────────────────────────────────────────────────────
+// 2-story modern luxury home. Grand columned portico, floor-to-ceiling
+// tinted windows, flat roof with parapet, balcony, gold accents.
+// `side='south'` faces -z (toward street); `side='north'` faces +z.
+function LuxuryMansion({ x, z, side = 'south', wallColor = LUX_IVORY }: {
+  x: number; z: number; side?: 'north' | 'south'; wallColor?: string;
+}) {
+  const fz   = side === 'south' ? -1 : 1;
+  const W    = 10.0;           // facade width
+  const GH   = 3.6;            // ground-floor height
+  const UH   = 3.2;            // upper-floor height
+  const BD   = 9.0;            // body depth (front to back)
+  const PD   = 2.6;            // portico depth (projects toward street)
+  const FDN  = 0.44;           // foundation height
+  const CRN  = 0.28;           // inter-floor cornice height
+  const topY = FDN + GH + CRN + UH;   // 7.52 — top of upper wall
+  const frontZ = fz * BD * 0.5;       // local z of front wall face
+  const portCZ = fz * (BD * 0.5 + PD * 0.5);   // portico centre
+  const stepZ  = fz * (BD * 0.5 + PD + 0.35);  // steps
+
   return (
-    <group position={[x, 0, z]} rotation={[0, rot, 0]}>
-      {/* Brick foundation piers — wide and prominent, authentic look */}
-      {[-2.0, -0.65, 0.65, 2.0].map((px, i) => (
-        <group key={i}>
-          <Box pos={[px, 0.28, 0.8]}  size={[0.28, 0.56, 0.28]} color="#6a4a3a" roughness={0.95} />
-          <Box pos={[px, 0.28, -0.8]} size={[0.28, 0.56, 0.28]} color="#6a4a3a" roughness={0.95} />
-        </group>
-      ))}
+    <group position={[x, 0, z]}>
 
-      {/* Skirting between piers — dark lattice suggestion */}
-      <Box pos={[0, 0.22, 1.92]} size={[5.4, 0.38, 0.06]} color="#1a1210" roughness={0.98} />
-      <Box pos={[0, 0.22, -1.92]} size={[5.4, 0.38, 0.06]} color="#1a1210" roughness={0.98} />
-
-      {/* Main body — raised 0.56 off ground */}
-      <Box pos={[0, 1.36, 0]} size={[5.4, 1.60, 3.84]} color={wallColor} receiveShadow />
-
-      {/* Horizontal siding texture — dark trim lines */}
-      {[0.55, 0.82, 1.10, 1.38, 1.65, 1.92].map((y, i) => (
-        <Box key={i} pos={[0, y, 1.93]} size={[5.42, 0.030, 0.015]} color={WOOD_DARK} roughness={0.95} />
-      ))}
-      {[0.55, 0.82, 1.10, 1.38, 1.65, 1.92].map((y, i) => (
-        <Box key={i} pos={[0, y, -1.93]} size={[5.42, 0.030, 0.015]} color={WOOD_DARK} roughness={0.95} />
-      ))}
-
-      {/* Front porch deck */}
-      <Box pos={[0, 0.57, 2.52]} size={[5.6, 0.09, 1.30]} color={WOOD_DARK} receiveShadow />
-
-      {/* Porch columns — square with capitals */}
-      {[-2.1, -0.7, 0.7, 2.1].map((px, i) => (
-        <group key={i}>
-          <Box pos={[px, 1.28, 3.00]} size={[0.14, 1.42, 0.14]} color={trimColor} />
-          {/* Capital */}
-          <Box pos={[px, 2.04, 3.00]} size={[0.22, 0.10, 0.22]} color={trimColor} />
-          {/* Base */}
-          <Box pos={[px, 0.64, 3.00]} size={[0.22, 0.10, 0.22]} color={trimColor} />
-        </group>
-      ))}
-
-      {/* Porch frieze board */}
-      <Box pos={[0, 2.10, 3.00]} size={[5.6, 0.16, 0.07]} color={trimColor} />
-      {/* Porch railing top and bottom */}
-      <Box pos={[0, 1.20, 3.18]} size={[5.6, 0.07, 0.05]} color={trimColor} />
-      <Box pos={[0, 0.76, 3.18]} size={[5.6, 0.07, 0.05]} color={trimColor} />
-      {/* Balusters */}
-      {Array.from({ length: 9 }, (_, i) => (
-        <Box key={i} pos={[-2.2 + i * 0.55, 0.98, 3.18]} size={[0.04, 0.44, 0.04]} color={trimColor} />
-      ))}
-
-      {/* Gable roof — slightly steeper pitch */}
-      <mesh position={[0, 2.25, 0.0]} castShadow>
-        <boxGeometry args={[5.8, 0.10, 4.10]} />
-        <meshStandardMaterial color={roofColor} roughness={0.95} />
-      </mesh>
-      <mesh position={[0, 2.70, -1.82]} rotation={[-0.52, 0, 0]} castShadow>
-        <boxGeometry args={[5.78, 0.10, 2.35]} />
-        <meshStandardMaterial color={roofColor} roughness={0.95} />
-      </mesh>
-      <mesh position={[0, 2.70, 1.82]} rotation={[0.52, 0, 0]} castShadow>
-        <boxGeometry args={[5.78, 0.10, 2.35]} />
-        <meshStandardMaterial color={roofColor} roughness={0.95} />
-      </mesh>
-      {/* Gable ends */}
-      <mesh position={[2.82, 2.66, 0]}>
-        <boxGeometry args={[0.08, 0.90, 4.10]} />
-        <meshStandardMaterial color={roofColor} roughness={0.95} />
-      </mesh>
-      <mesh position={[-2.82, 2.66, 0]}>
-        <boxGeometry args={[0.08, 0.90, 4.10]} />
-        <meshStandardMaterial color={roofColor} roughness={0.95} />
-      </mesh>
-      {/* Fascia / eave trim */}
-      <Box pos={[0, 2.24, 2.08]} size={[5.9, 0.14, 0.07]} color={trimColor} />
-      <Box pos={[0, 2.24, -2.08]} size={[5.9, 0.14, 0.07]} color={trimColor} />
-
-      {/* Chimney */}
-      {hasChimney && (
-        <group position={[1.5, 2.95, -0.4]}>
-          <Box pos={[0, 0, 0]} size={[0.36, 0.90, 0.36]} color="#6a4438" roughness={0.96} />
-          <Box pos={[0, 0.50, 0]} size={[0.42, 0.08, 0.42]} color="#5a3a30" roughness={0.96} />
-        </group>
-      )}
-
-      {/* Windows — double-hung with shutters */}
-      {[-1.4, 1.4].map((px, i) => (
-        <group key={i} position={[px, 1.38, 1.925]}>
-          {/* Window frame */}
-          <Box pos={[0, 0, 0]} size={[0.78, 0.88, 0.06]} color={trimColor} />
-          {/* Glass — warm emissive window glow */}
-          <mesh position={[0, 0, 0.04]}>
-            <planeGeometry args={[0.62, 0.72]} />
-            <meshStandardMaterial color="#ffcc44" emissive="#ffcc44" emissiveIntensity={0.18} transparent opacity={0.65} />
-          </mesh>
-          {/* Shutters */}
-          <Box pos={[-0.52, 0, 0.01]} size={[0.22, 0.88, 0.04]} color={TRIM_GREEN} roughness={0.8} />
-          <Box pos={[ 0.52, 0, 0.01]} size={[0.22, 0.88, 0.04]} color={TRIM_GREEN} roughness={0.8} />
-        </group>
-      ))}
-
-      {/* Door with screen door suggestion */}
-      <Box pos={[0, 0.88, 1.925]} size={[0.78, 1.68, 0.06]} color={WOOD_DARK} />
-      <Box pos={[0, 0.88, 1.935]} size={[0.72, 1.60, 0.03]} color="#2a3e1a" roughness={0.85} />
-
-      {/* Porch light — warm amber globe (emissive only, no point light) */}
-      {hasLight && (
-        <mesh position={[0, 2.08, 2.85]}>
-          <sphereGeometry args={[0.07, 6, 6]} />
-          <meshBasicMaterial color="#ffdd88" />
+      {/* ── PHYSICS COLLIDERS (solid, invisible) ──────────────────────── */}
+      {/* Main building block */}
+      <RigidBody type="fixed">
+        <mesh position={[0, topY * 0.5 + 0.5, 0]} visible={false}>
+          <boxGeometry args={[W + 1.0, topY + 3.0, BD + 1.0]} />
+          <meshBasicMaterial />
         </mesh>
+      </RigidBody>
+      {/* Portico approach block */}
+      <RigidBody type="fixed">
+        <mesh position={[0, 2.5, portCZ]} visible={false}>
+          <boxGeometry args={[W + 1.0, 5.5, PD + 0.6]} />
+          <meshBasicMaterial />
+        </mesh>
+      </RigidBody>
+      {/* Side-yard hedge walls — stop player cutting around */}
+      {([-1, 1] as const).map((sx, si) => (
+        <RigidBody key={si} type="fixed">
+          <mesh position={[sx * (W * 0.5 + 0.9), 1.5, 0]} visible={false}>
+            <boxGeometry args={[0.8, 3.0, BD + 6.0]} />
+            <meshBasicMaterial />
+          </mesh>
+        </RigidBody>
+      ))}
+
+      {/* ── FOUNDATION ────────────────────────────────────────────────── */}
+      <mesh position={[0, FDN * 0.5, fz * 0.4]} castShadow>
+        <boxGeometry args={[W + 0.5, FDN, BD + 1.2]} />
+        <meshStandardMaterial color={LUX_STONE} roughness={0.84} metalness={0.06} />
+      </mesh>
+
+      {/* ── GROUND FLOOR ──────────────────────────────────────────────── */}
+      <mesh position={[0, FDN + GH * 0.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[W, GH, BD]} />
+        <meshStandardMaterial color={wallColor} roughness={0.65} />
+      </mesh>
+      {/* Corner quoins */}
+      {([-1, 1] as const).map((sx, si) =>
+        [0.45, 1.25, 2.05, 2.85].map((qy, qi) => (
+          <mesh key={`q-${si}-${qi}`} position={[sx * (W * 0.5 + 0.08), FDN + qy, 0]}>
+            <boxGeometry args={[0.18, 0.30, BD + 0.16]} />
+            <meshStandardMaterial color={LUX_STONE} roughness={0.80} />
+          </mesh>
+        ))
       )}
 
-      {/* Steps */}
-      <Box pos={[0, 0.35, 3.25]} size={[1.1, 0.16, 0.44]} color={SIDEWALK_TAN} roughness={0.92} />
-      <Box pos={[0, 0.18, 3.48]} size={[1.1, 0.12, 0.44]} color={SIDEWALK_TAN} roughness={0.92} />
+      {/* ── INTER-FLOOR CORNICE ───────────────────────────────────────── */}
+      <mesh position={[0, FDN + GH + CRN * 0.5, 0]}>
+        <boxGeometry args={[W + 0.22, CRN, BD + 0.22]} />
+        <meshStandardMaterial color={LUX_STONE} roughness={0.76} />
+      </mesh>
+
+      {/* ── UPPER FLOOR ───────────────────────────────────────────────── */}
+      <mesh position={[0, FDN + GH + CRN + UH * 0.5, 0]} castShadow>
+        <boxGeometry args={[W, UH, BD]} />
+        <meshStandardMaterial color={wallColor} roughness={0.65} />
+      </mesh>
+
+      {/* ── FLAT ROOF + PARAPET ───────────────────────────────────────── */}
+      {/* Roof slab */}
+      <mesh position={[0, topY + 0.32, 0]}>
+        <boxGeometry args={[W + 0.5, 0.64, BD + 0.5]} />
+        <meshStandardMaterial color={LUX_ROOF} roughness={0.90} metalness={0.12} />
+      </mesh>
+      {/* Parapet walls */}
+      {[
+        [0, topY + 0.88, fz * (BD * 0.5 + 0.14), W + 0.5, 0.9, 0.28],
+        [0, topY + 0.88, -fz * (BD * 0.5 + 0.14), W + 0.5, 0.9, 0.28],
+        [-(W * 0.5 + 0.14), topY + 0.88, 0, 0.28, 0.9, BD + 0.5],
+        [ (W * 0.5 + 0.14), topY + 0.88, 0, 0.28, 0.9, BD + 0.5],
+      ].map(([px, py, pz, pw, ph, pd], i) => (
+        <mesh key={i} position={[px, py, pz]}>
+          <boxGeometry args={[pw, ph, pd]} />
+          <meshStandardMaterial color={wallColor} roughness={0.66} />
+        </mesh>
+      ))}
+      {/* Rooftop HVAC box (detail) */}
+      <mesh position={[W * 0.28, topY + 0.72, -BD * 0.2]}>
+        <boxGeometry args={[1.4, 0.65, 0.9]} />
+        <meshStandardMaterial color="#282830" roughness={0.85} metalness={0.3} />
+      </mesh>
+
+      {/* ── GRAND PORTICO ─────────────────────────────────────────────── */}
+      {/* Portico floor platform */}
+      <mesh position={[0, FDN * 0.5, portCZ]}>
+        <boxGeometry args={[9.2, FDN, PD]} />
+        <meshStandardMaterial color={LUX_STONE} roughness={0.74} metalness={0.08} />
+      </mesh>
+      {/* Entablature (beam across columns) */}
+      <mesh position={[0, FDN + GH + 0.08, portCZ]}>
+        <boxGeometry args={[9.4, 0.22, PD + 0.08]} />
+        <meshStandardMaterial color={LUX_STONE} roughness={0.72} />
+      </mesh>
+      {/* Portico soffit (ceiling) */}
+      <mesh position={[0, FDN + GH - 0.12, portCZ]}>
+        <boxGeometry args={[9.2, 0.10, PD]} />
+        <meshStandardMaterial color={LUX_COLUMN} roughness={0.55} />
+      </mesh>
+      {/* 6 round columns */}
+      {[-3.84, -2.30, -0.76, 0.76, 2.30, 3.84].map((cx, ci) => (
+        <group key={ci} position={[cx, 0, portCZ]}>
+          {/* Base plinth */}
+          <mesh position={[0, FDN + 0.14, 0]}>
+            <boxGeometry args={[0.40, 0.28, 0.40]} />
+            <meshStandardMaterial color={LUX_COLUMN} roughness={0.52} />
+          </mesh>
+          {/* Column shaft */}
+          <mesh position={[0, FDN + 0.28 + (GH - 0.56) * 0.5, 0]}>
+            <cylinderGeometry args={[0.155, 0.195, GH - 0.56, 14]} />
+            <meshStandardMaterial color={LUX_COLUMN} roughness={0.42} metalness={0.06} />
+          </mesh>
+          {/* Capital */}
+          <mesh position={[0, FDN + GH - 0.12, 0]}>
+            <boxGeometry args={[0.44, 0.22, 0.44]} />
+            <meshStandardMaterial color={LUX_COLUMN} roughness={0.50} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── STEPS (3 toward street) ───────────────────────────────────── */}
+      {[0, 1, 2].map((s) => (
+        <mesh key={s} position={[0, s * 0.17 + 0.085, stepZ + fz * s * 0.32]}>
+          <boxGeometry args={[5.8 - s * 0.55, 0.17, 0.34]} />
+          <meshStandardMaterial color={LUX_STONE} roughness={0.76} />
+        </mesh>
+      ))}
+
+      {/* ── GROUND FLOOR WINDOWS (front, 4 large) ────────────────────── */}
+      {[-3.5, -1.17, 1.17, 3.5].map((wx, wi) => (
+        <group key={wi} position={[wx, FDN + 1.85, frontZ]}>
+          <mesh position={[0, 0, 0.025]}>
+            <boxGeometry args={[1.08, 2.15, 0.065]} />
+            <meshStandardMaterial color={LUX_DARK} roughness={0.45} metalness={0.32} />
+          </mesh>
+          <mesh position={[0, 0, 0.065]}>
+            <boxGeometry args={[0.86, 1.92, 0.04]} />
+            <meshStandardMaterial color={LUX_GLASS} roughness={0.08} metalness={0.85} emissive={LUX_GLASS} emissiveIntensity={0.14} />
+          </mesh>
+          {/* Sill */}
+          <mesh position={[0, -1.15, 0.09]}>
+            <boxGeometry args={[1.24, 0.10, 0.22]} />
+            <meshStandardMaterial color={LUX_STONE} roughness={0.72} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── UPPER FLOOR WINDOWS (front, 4) ───────────────────────────── */}
+      {[-3.5, -1.17, 1.17, 3.5].map((wx, wi) => (
+        <group key={wi} position={[wx, FDN + GH + CRN + 1.55, frontZ]}>
+          <mesh position={[0, 0, 0.025]}>
+            <boxGeometry args={[0.98, 1.90, 0.065]} />
+            <meshStandardMaterial color={LUX_DARK} roughness={0.45} metalness={0.32} />
+          </mesh>
+          <mesh position={[0, 0, 0.065]}>
+            <boxGeometry args={[0.76, 1.68, 0.04]} />
+            <meshStandardMaterial color={LUX_GLASS} roughness={0.08} metalness={0.85} emissive={LUX_GLASS} emissiveIntensity={0.12} />
+          </mesh>
+          <mesh position={[0, -1.02, 0.09]}>
+            <boxGeometry args={[1.12, 0.09, 0.20]} />
+            <meshStandardMaterial color={LUX_STONE} roughness={0.72} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── SIDE WINDOWS (2 per floor per side) ──────────────────────── */}
+      {([-1, 1] as const).map((sx, si) =>
+        [FDN + 1.85, FDN + GH + CRN + 1.55].map((wy, fi) =>
+          [-BD * 0.24, BD * 0.24].map((wz, wi) => (
+            <group key={`s-${si}-${fi}-${wi}`} position={[sx * W * 0.5, wy, wz]}>
+              <mesh position={[sx * 0.025, 0, 0]}>
+                <boxGeometry args={[0.065, fi === 0 ? 2.15 : 1.90, 1.05]} />
+                <meshStandardMaterial color={LUX_DARK} roughness={0.45} metalness={0.32} />
+              </mesh>
+              <mesh position={[sx * 0.065, 0, 0]}>
+                <boxGeometry args={[0.04, fi === 0 ? 1.92 : 1.68, 0.83]} />
+                <meshStandardMaterial color={LUX_GLASS} roughness={0.08} metalness={0.85} emissive={LUX_GLASS} emissiveIntensity={0.11} />
+              </mesh>
+            </group>
+          ))
+        )
+      )}
+
+      {/* ── BALCONY (upper floor, above portico, centre) ─────────────── */}
+      <mesh position={[0, FDN + GH + CRN + 0.28, fz * (BD * 0.5 + 0.32)]}>
+        <boxGeometry args={[3.6, 0.20, 1.0]} />
+        <meshStandardMaterial color={LUX_STONE} roughness={0.62} metalness={0.12} />
+      </mesh>
+      {Array.from({ length: 9 }, (_, i) => (
+        <mesh key={i} position={[-1.6 + i * 0.4, FDN + GH + CRN + 0.55, fz * (BD * 0.5 + 0.5)]}>
+          <boxGeometry args={[0.055, 0.60, 0.055]} />
+          <meshStandardMaterial color={LUX_DARK} roughness={0.38} metalness={0.65} />
+        </mesh>
+      ))}
+      <mesh position={[0, FDN + GH + CRN + 0.82, fz * (BD * 0.5 + 0.5)]}>
+        <boxGeometry args={[3.5, 0.065, 0.065]} />
+        <meshStandardMaterial color={LUX_GOLD} roughness={0.22} metalness={0.88} />
+      </mesh>
+
+      {/* ── DOUBLE ENTRY DOORS ────────────────────────────────────────── */}
+      <mesh position={[0, FDN + 1.58, frontZ + fz * 0.06]}>
+        <boxGeometry args={[2.18, 3.16, 0.12]} />
+        <meshStandardMaterial color={LUX_STONE} roughness={0.70} />
+      </mesh>
+      {([-0.52, 0.52] as number[]).map((dx, di) => (
+        <mesh key={di} position={[dx, FDN + 1.32, frontZ + fz * 0.12]}>
+          <boxGeometry args={[0.88, 2.64, 0.09]} />
+          <meshStandardMaterial color="#090912" roughness={0.40} metalness={0.25} />
+        </mesh>
+      ))}
+      {/* Door handles */}
+      {([-0.07, 0.07] as number[]).map((hx, hi) => (
+        <mesh key={hi} position={[hx, FDN + 1.32, frontZ + fz * 0.18]}>
+          <boxGeometry args={[0.045, 0.24, 0.045]} />
+          <meshStandardMaterial color={LUX_GOLD} metalness={0.92} roughness={0.12} />
+        </mesh>
+      ))}
+      {/* Transom / fanlight above doors */}
+      <mesh position={[0, FDN + 2.88, frontZ + fz * 0.12]}>
+        <boxGeometry args={[1.92, 0.52, 0.09]} />
+        <meshStandardMaterial color={LUX_GLASS} roughness={0.08} metalness={0.8} emissive={LUX_GLASS} emissiveIntensity={0.22} />
+      </mesh>
+
+      {/* ── GOLD ACCENT LINES (cornice strips on facade) ─────────────── */}
+      <mesh position={[0, FDN + 0.03, fz * (BD * 0.5 + 0.02)]}>
+        <boxGeometry args={[W + 0.06, 0.06, 0.05]} />
+        <meshStandardMaterial color={LUX_GOLD} metalness={0.90} roughness={0.16} />
+      </mesh>
+      <mesh position={[0, topY + 0.04, fz * (BD * 0.5 + 0.02)]}>
+        <boxGeometry args={[W + 0.52, 0.06, 0.05]} />
+        <meshStandardMaterial color={LUX_GOLD} metalness={0.90} roughness={0.16} />
+      </mesh>
+
+      {/* ── WALL-MOUNTED SCONCE LIGHTS ────────────────────────────────── */}
+      {([-1.22, 1.22] as number[]).map((lx, li) => (
+        <group key={li} position={[lx, FDN + 2.65, frontZ + fz * 0.16]}>
+          <mesh>
+            <boxGeometry args={[0.09, 0.32, 0.09]} />
+            <meshStandardMaterial color={LUX_GOLD} metalness={0.88} roughness={0.20} />
+          </mesh>
+          <mesh position={[0, 0.24, 0]}>
+            <sphereGeometry args={[0.11, 7, 6]} />
+            <meshStandardMaterial color="#fff8e0" emissive="#fff8e0" emissiveIntensity={1.2} roughness={0.3} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── LANDSCAPING ───────────────────────────────────────────────── */}
+      {/* Manicured sphere hedges flanking steps */}
+      {([-3.8, 3.8] as number[]).map((hx, hi) => (
+        <mesh key={hi} position={[hx, 0.72, fz * (BD * 0.5 + 0.7)]}>
+          <sphereGeometry args={[0.74, 9, 7]} />
+          <meshStandardMaterial color={DARK_GREEN} roughness={0.95} />
+        </mesh>
+      ))}
+      {/* Box hedges lining the yard */}
+      {([-W * 0.44, W * 0.44] as number[]).map((hx, hi) => (
+        <mesh key={hi} position={[hx, 0.55, fz * (BD * 0.42 + 1.2)]}>
+          <sphereGeometry args={[0.56, 8, 6]} />
+          <meshStandardMaterial color={DARK_GREEN} roughness={0.95} />
+        </mesh>
+      ))}
+      {/* Stone path from steps to street */}
+      <mesh position={[0, 0.015, fz * (BD * 0.5 + 3.6)]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[1.6, 6.0]} />
+        <meshStandardMaterial color="#b0a898" roughness={0.86} />
+      </mesh>
+      {/* Lawn patch */}
+      <mesh position={[0, 0.008, fz * (BD * 0.5 + 2.8)]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[W + 1.0, 7.5]} />
+        <meshStandardMaterial color={DARK_GREEN} roughness={0.95} />
+      </mesh>
+
     </group>
   );
 }
+
+// ── Grand Estate ────────────────────────────────────────────────────────────
+// Traditional luxury manor: warm brick, arched windows, steep hipped roof,
+// full verandah, bay window, stone gate posts with lanterns.
+// `side='south'` faces -z (toward street); `side='north'` faces +z.
+function GrandEstate({ x, z, side = 'south', wallColor = BRICK_DEEP }: {
+  x: number; z: number; side?: 'north' | 'south'; wallColor?: string;
+}) {
+  const fz   = side === 'south' ? -1 : 1;
+  const W    = 12.0;
+  const BH   = 4.4;            // main wall height
+  const BD   = 10.0;           // body depth
+  const VD   = 2.8;            // verandah depth
+  const FDN  = 0.60;           // stone foundation height
+  const topY = FDN + BH;       // top of wall (5.0)
+  const frontZ = fz * BD * 0.5;
+  const verCZ  = fz * (BD * 0.5 + VD * 0.5);
+  const stepZ  = fz * (BD * 0.5 + VD + 0.4);
+
+  return (
+    <group position={[x, 0, z]}>
+
+      {/* ── PHYSICS COLLIDERS ─────────────────────────────────────────── */}
+      <RigidBody type="fixed">
+        <mesh position={[0, (topY + 2.5) * 0.5, 0]} visible={false}>
+          <boxGeometry args={[W + 1.2, topY + 5.5, BD + 1.2]} />
+          <meshBasicMaterial />
+        </mesh>
+      </RigidBody>
+      <RigidBody type="fixed">
+        <mesh position={[0, 3.0, verCZ]} visible={false}>
+          <boxGeometry args={[W + 1.2, 6.0, VD + 0.6]} />
+          <meshBasicMaterial />
+        </mesh>
+      </RigidBody>
+      {/* Side yard walls */}
+      {([-1, 1] as const).map((sx, si) => (
+        <RigidBody key={si} type="fixed">
+          <mesh position={[sx * (W * 0.5 + 1.0), 1.5, 0]} visible={false}>
+            <boxGeometry args={[0.8, 3.0, BD + 7.0]} />
+            <meshBasicMaterial />
+          </mesh>
+        </RigidBody>
+      ))}
+
+      {/* ── STONE FOUNDATION ──────────────────────────────────────────── */}
+      <mesh position={[0, FDN * 0.5, fz * 0.3]} castShadow>
+        <boxGeometry args={[W + 0.7, FDN, BD + 0.9]} />
+        <meshStandardMaterial color="#7a7060" roughness={0.92} metalness={0.04} />
+      </mesh>
+
+      {/* ── BRICK MAIN BODY ───────────────────────────────────────────── */}
+      <mesh position={[0, FDN + BH * 0.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[W, BH, BD]} />
+        <meshStandardMaterial color={wallColor} roughness={0.88} metalness={0.02} />
+      </mesh>
+      {/* Brick horizontal mortar lines (subtle) */}
+      {Array.from({ length: 7 }, (_, i) => (
+        <mesh key={i} position={[0, FDN + 0.4 + i * 0.58, fz * (BD * 0.5 + 0.01)]}>
+          <boxGeometry args={[W + 0.02, 0.04, 0.04]} />
+          <meshStandardMaterial color="#5a2818" roughness={0.95} />
+        </mesh>
+      ))}
+      {/* White corner quoins */}
+      {([-1, 1] as const).map((sx, si) =>
+        Array.from({ length: 5 }, (_, qi) => (
+          <mesh key={`qe-${si}-${qi}`} position={[sx * (W * 0.5 + 0.11), FDN + 0.42 + qi * 0.85, 0]}>
+            <boxGeometry args={[0.24, 0.65, BD + 0.24]} />
+            <meshStandardMaterial color={MANOR_CREAM} roughness={0.82} />
+          </mesh>
+        ))
+      )}
+
+      {/* ── WHITE CORNICE ─────────────────────────────────────────────── */}
+      <mesh position={[0, topY + 0.12, 0]}>
+        <boxGeometry args={[W + 0.32, 0.24, BD + 0.32]} />
+        <meshStandardMaterial color={MANOR_CREAM} roughness={0.70} />
+      </mesh>
+      <mesh position={[0, topY + 0.28, fz * (BD * 0.5 + 0.16)]}>
+        <boxGeometry args={[W + 0.32, 0.18, 0.35]} />
+        <meshStandardMaterial color={MANOR_CREAM} roughness={0.70} />
+      </mesh>
+
+      {/* ── STEEP HIPPED ROOF ─────────────────────────────────────────── */}
+      <mesh position={[0, topY + 0.42 + 1.1, 0]}>
+        <coneGeometry args={[Math.hypot(W, BD) * 0.52, 2.6, 4, 1]} />
+        <meshStandardMaterial color={MANOR_ROOF} roughness={0.93} />
+      </mesh>
+      <mesh position={[0, topY + 0.32, 0]}>
+        <boxGeometry args={[W + 0.32, 0.20, BD + 0.32]} />
+        <meshStandardMaterial color={MANOR_ROOF} roughness={0.92} />
+      </mesh>
+      {/* Chimney */}
+      {([[W * 0.3, -BD * 0.22], [-W * 0.28, BD * 0.18]] as [number, number][]).map(([cx, cz], ci) => (
+        <group key={ci} position={[cx, topY + 0.6, cz]}>
+          <mesh position={[0, 1.1, 0]}>
+            <boxGeometry args={[0.52, 2.2, 0.52]} />
+            <meshStandardMaterial color="#5a3020" roughness={0.96} />
+          </mesh>
+          <mesh position={[0, 2.25, 0]}>
+            <boxGeometry args={[0.66, 0.16, 0.66]} />
+            <meshStandardMaterial color="#4a2818" roughness={0.96} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── FULL-WIDTH VERANDAH ───────────────────────────────────────── */}
+      {/* Verandah floor */}
+      <mesh position={[0, 0.36, verCZ]}>
+        <boxGeometry args={[W + 0.2, 0.06, VD]} />
+        <meshStandardMaterial color="#c8c0a0" roughness={0.82} />
+      </mesh>
+      {/* Verandah ceiling */}
+      <mesh position={[0, FDN + BH - 0.22, verCZ]}>
+        <boxGeometry args={[W + 0.22, 0.18, VD + 0.18]} />
+        <meshStandardMaterial color={MANOR_ROOF} roughness={0.90} />
+      </mesh>
+      {/* 7 round verandah columns */}
+      {Array.from({ length: 7 }, (_, i) => {
+        const cx = -W * 0.5 + i * (W / 6);
+        return (
+          <group key={i} position={[cx, 0, verCZ]}>
+            <mesh position={[0, 0.36 + 0.14, 0]}>
+              <boxGeometry args={[0.26, 0.28, 0.26]} />
+              <meshStandardMaterial color={MANOR_CREAM} roughness={0.58} />
+            </mesh>
+            <mesh position={[0, 0.36 + 0.28 + (FDN + BH - 0.8) * 0.5, 0]}>
+              <cylinderGeometry args={[0.13, 0.16, FDN + BH - 0.8, 12]} />
+              <meshStandardMaterial color={MANOR_CREAM} roughness={0.42} metalness={0.06} />
+            </mesh>
+            <mesh position={[0, FDN + BH - 0.32, 0]}>
+              <boxGeometry args={[0.30, 0.22, 0.30]} />
+              <meshStandardMaterial color={MANOR_CREAM} roughness={0.58} />
+            </mesh>
+          </group>
+        );
+      })}
+      {/* Verandah balustrade */}
+      <mesh position={[0, 0.36 + 1.02, verCZ + fz * (VD * 0.5 - 0.04)]}>
+        <boxGeometry args={[W, 0.09, 0.07]} />
+        <meshStandardMaterial color={MANOR_CREAM} roughness={0.52} />
+      </mesh>
+      {Array.from({ length: 19 }, (_, i) => (
+        <mesh key={i} position={[-W * 0.5 + 0.36 + i * (W - 0.5) / 18, 0.36 + 0.62, verCZ + fz * (VD * 0.5 - 0.04)]}>
+          <boxGeometry args={[0.065, 0.65, 0.065]} />
+          <meshStandardMaterial color={MANOR_CREAM} roughness={0.52} />
+        </mesh>
+      ))}
+
+      {/* ── ARCHED WINDOWS (front, 4) ─────────────────────────────────── */}
+      {[-4.2, -1.4, 1.4, 4.2].map((wx, wi) => (
+        <group key={wi} position={[wx, FDN + 2.1, frontZ]}>
+          {/* White surround */}
+          <mesh position={[0, 0, 0.04]}>
+            <boxGeometry args={[1.18, 2.35, 0.10]} />
+            <meshStandardMaterial color={MANOR_CREAM} roughness={0.65} />
+          </mesh>
+          {/* Glass pane */}
+          <mesh position={[0, -0.1, 0.10]}>
+            <boxGeometry args={[0.94, 1.85, 0.05]} />
+            <meshStandardMaterial color={LUX_GLASS} roughness={0.08} metalness={0.85} emissive={LUX_GLASS} emissiveIntensity={0.14} />
+          </mesh>
+          {/* Arch cap (half cylinder) */}
+          <mesh position={[0, 1.1, 0.04]} rotation={[0, 0, Math.PI * 0.5]}>
+            <cylinderGeometry args={[0.60, 0.60, 0.10, 10, 1, false, 0, Math.PI]} />
+            <meshStandardMaterial color={MANOR_CREAM} roughness={0.65} />
+          </mesh>
+          {/* Sill */}
+          <mesh position={[0, -1.28, 0.12]}>
+            <boxGeometry args={[1.34, 0.10, 0.24]} />
+            <meshStandardMaterial color={LUX_STONE} roughness={0.75} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── GRAND DOUBLE DOORS ────────────────────────────────────────── */}
+      <mesh position={[0, FDN + 1.58, frontZ + fz * 0.07]}>
+        <boxGeometry args={[2.5, 3.16, 0.14]} />
+        <meshStandardMaterial color={MANOR_CREAM} roughness={0.68} />
+      </mesh>
+      {([-0.58, 0.58] as number[]).map((dx, di) => (
+        <mesh key={di} position={[dx, FDN + 1.38, frontZ + fz * 0.13]}>
+          <boxGeometry args={[0.95, 2.76, 0.09]} />
+          <meshStandardMaterial color="#060810" roughness={0.38} metalness={0.28} />
+        </mesh>
+      ))}
+      {/* Arched transom over doors */}
+      <mesh position={[0, FDN + 2.98, frontZ + fz * 0.13]}>
+        <boxGeometry args={[2.1, 0.55, 0.09]} />
+        <meshStandardMaterial color={LUX_GLASS} roughness={0.08} metalness={0.8} emissive={LUX_GLASS} emissiveIntensity={0.20} />
+      </mesh>
+
+      {/* ── BAY WINDOW (side) ─────────────────────────────────────────── */}
+      <mesh position={[W * 0.5 + 0.55, FDN + 1.9, fz * BD * 0.12]}>
+        <boxGeometry args={[1.1, 2.9, 3.2]} />
+        <meshStandardMaterial color={wallColor} roughness={0.88} />
+      </mesh>
+      <mesh position={[W * 0.5 + 1.04, FDN + 1.9, fz * BD * 0.12]}>
+        <boxGeometry args={[0.07, 2.55, 2.7]} />
+        <meshStandardMaterial color={LUX_GLASS} roughness={0.08} metalness={0.85} emissive={LUX_GLASS} emissiveIntensity={0.12} />
+      </mesh>
+      {/* Bay roof */}
+      <mesh position={[W * 0.5 + 0.55, FDN + BH - 0.12, fz * BD * 0.12]}>
+        <boxGeometry args={[1.14, 0.18, 3.28]} />
+        <meshStandardMaterial color={MANOR_ROOF} roughness={0.90} />
+      </mesh>
+
+      {/* ── STEPS ─────────────────────────────────────────────────────── */}
+      {[0, 1, 2].map((s) => (
+        <mesh key={s} position={[0, s * 0.19 + 0.095, stepZ + fz * s * 0.34]}>
+          <boxGeometry args={[4.6 - s * 0.55, 0.19, 0.36]} />
+          <meshStandardMaterial color={LUX_STONE} roughness={0.78} />
+        </mesh>
+      ))}
+
+      {/* ── ENTRANCE LANTERNS ─────────────────────────────────────────── */}
+      {([-1.4, 1.4] as number[]).map((lx, li) => (
+        <group key={li} position={[lx, FDN + 2.6, frontZ + fz * 0.16]}>
+          <mesh>
+            <boxGeometry args={[0.11, 0.38, 0.11]} />
+            <meshStandardMaterial color={LUX_GOLD} metalness={0.88} roughness={0.22} />
+          </mesh>
+          <mesh position={[0, 0.28, 0]}>
+            <sphereGeometry args={[0.13, 7, 6]} />
+            <meshStandardMaterial color="#ffe8aa" emissive="#ffe8aa" emissiveIntensity={1.0} roughness={0.3} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── STONE GATE POSTS ──────────────────────────────────────────── */}
+      {([-W * 0.5 + 0.2, W * 0.5 - 0.2] as number[]).map((gx, gi) => (
+        <group key={gi} position={[gx, 0, fz * (BD * 0.5 + 4.0)]}>
+          <mesh position={[0, 1.6, 0]}>
+            <boxGeometry args={[0.55, 3.2, 0.55]} />
+            <meshStandardMaterial color="#7a7060" roughness={0.88} />
+          </mesh>
+          <mesh position={[0, 3.3, 0]}>
+            <boxGeometry args={[0.72, 0.42, 0.72]} />
+            <meshStandardMaterial color="#7a7060" roughness={0.85} />
+          </mesh>
+          <mesh position={[0, 3.62, 0]}>
+            <sphereGeometry args={[0.20, 8, 7]} />
+            <meshStandardMaterial color="#ffe088" emissive="#ffe088" emissiveIntensity={0.7} roughness={0.3} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* ── GARDEN ────────────────────────────────────────────────────── */}
+      <mesh position={[0, 0.015, fz * (BD * 0.5 + 2.2)]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[2.2, 7.5]} />
+        <meshStandardMaterial color="#a0988a" roughness={0.87} />
+      </mesh>
+      <mesh position={[0, 0.008, fz * (BD * 0.5 + 3.0)]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[W + 1.2, 8.0]} />
+        <meshStandardMaterial color={DARK_GREEN} roughness={0.95} />
+      </mesh>
+      {/* Garden hedge boxes */}
+      {([-4.2, -1.5, 1.5, 4.2] as number[]).map((hx, hi) => (
+        <mesh key={hi} position={[hx, 0.68, fz * (BD * 0.5 + 1.6)]}>
+          <boxGeometry args={[1.3, 1.36, 0.65]} />
+          <meshStandardMaterial color={DARK_GREEN} roughness={0.96} />
+        </mesh>
+      ))}
+
+    </group>
+  );
+}
+
 
 // ── Creole Cottage ─────────────────────────────────────────────────────────
 // Square, hipped roof, full-width front gallery, elegant shutters
@@ -706,54 +1164,154 @@ function CloudLayer() {
   );
 }
 
-// ── Weather controller — cycles weather states, updates fog + lights ────────
-const WEATHER_CYCLE_LEN = WEATHER_CYCLE.length;
-function WeatherController() {
+// ── Day/Night + Weather + Season system ─────────────────────────────────────
+// • Advances dayTime 1 game-hour per real minute (full day = 24 min)
+// • Cycles seasons every 5 real minutes
+// • Cycles weather per season weights (bayou = mostly sunny)
+// • Lerps sky colors, sun angle, ambient + sun intensity each frame
+const _skyC   = new THREE.Color();
+const _targetC = new THREE.Color();
+
+function DayNightSystem() {
   const { scene } = useThree();
-  const ambientRef = useRef<THREE.AmbientLight>(null);
-  const sunRef = useRef<THREE.DirectionalLight>(null);
-  const hemiRef = useRef<THREE.HemisphereLight>(null);
-  const timer = useRef(120);
-  const cycleIdx = useRef(0);
+
+  const ambientRef  = useRef<THREE.AmbientLight>(null);
+  const sunRef      = useRef<THREE.DirectionalLight>(null);
+  const moonRef     = useRef<THREE.DirectionalLight>(null);
+  const hemiRef     = useRef<THREE.HemisphereLight>(null);
+  const upperDomeRef = useRef<THREE.Mesh>(null);
+  const horizonRef   = useRef<THREE.Mesh>(null);
+  const hazeRef      = useRef<THREE.Mesh>(null);
+
+  // Weather cycle timer
+  const weatherTimer = useRef(90);
+  const weatherIdx   = useRef(0);
+  // Season cycle timer
+  const seasonTimer  = useRef(300);
+  const seasonIdx    = useRef(1);   // start on first 'summer' in SEASON_CYCLE
 
   useEffect(() => {
-    scene.fog = new THREE.Fog('#c8e4f8', 40, 200);
+    scene.fog = new THREE.Fog('#c8e4f8', 80, 300);
     return () => { scene.fog = null; };
   }, [scene]);
 
   useFrame((_, delta) => {
-    timer.current -= delta;
-    if (timer.current <= 0) {
-      cycleIdx.current = (cycleIdx.current + 1) % WEATHER_CYCLE_LEN;
-      applyWeather(WEATHER_CYCLE[cycleIdx.current]);
-      timer.current = 70 + Math.random() * 80;
+    // ── Advance game time: 1 real second = 1 game minute ──────────────────
+    weatherStore.dayTime = (weatherStore.dayTime + delta / 60) % 24;
+    const hour = weatherStore.dayTime;
+    weatherStore.isNight = hour >= 20 || hour < 6;
 
-      if (scene.fog) {
-        const fog = scene.fog as THREE.Fog;
-        fog.near = weatherStore.fogNear;
-        fog.far = weatherStore.fogFar;
-        if (weatherStore.state === 'clear')  fog.color.set('#c8e4f8');
-        if (weatherStore.state === 'cloudy') fog.color.set('#a8c0d4');
-        if (weatherStore.state === 'rain')   fog.color.set('#7090a0');
-        if (weatherStore.state === 'storm')  fog.color.set('#506070');
-      }
+    // ── Season cycle (every 5 real minutes) ──────────────────────────────
+    weatherStore.seasonTimer -= delta;
+    if (weatherStore.seasonTimer <= 0) {
+      weatherStore.seasonTimer = 300;
+      seasonIdx.current = (seasonIdx.current + 1) % SEASON_CYCLE.length;
+      weatherStore.season = SEASON_CYCLE[seasonIdx.current];
+      // Reset weather for new season
+      weatherIdx.current = 0;
+      const cycle = SEASON_WEATHER[weatherStore.season];
+      applyWeather(cycle[0]);
+      weatherTimer.current = 90 + Math.random() * 60;
     }
 
-    // Smoothly lerp lights toward target values every frame
-    if (ambientRef.current) {
-      ambientRef.current.intensity += (weatherStore.ambientIntensity - ambientRef.current.intensity) * delta * 0.5;
+    // ── Weather cycle (based on current season weights) ───────────────────
+    weatherTimer.current -= delta;
+    if (weatherTimer.current <= 0) {
+      const cycle = SEASON_WEATHER[weatherStore.season];
+      weatherIdx.current = (weatherIdx.current + 1) % cycle.length;
+      applyWeather(cycle[weatherIdx.current]);
+      weatherTimer.current = 80 + Math.random() * 70;
     }
+
+    // ── Sky colors ────────────────────────────────────────────────────────
+    const [upperHex, horizonHex] = getSkyColors(hour, weatherStore.season);
+    weatherStore.upperSkyHex = upperHex;
+    weatherStore.horizonHex  = horizonHex;
+
+    if (upperDomeRef.current) {
+      const mat = upperDomeRef.current.material as THREE.MeshBasicMaterial;
+      _targetC.set(upperHex);
+      mat.color.lerp(_targetC, delta * 0.8);
+    }
+    if (horizonRef.current) {
+      const mat = horizonRef.current.material as THREE.MeshBasicMaterial;
+      _targetC.set(horizonHex);
+      mat.color.lerp(_targetC, delta * 0.8);
+    }
+
+    // ── Lights ───────────────────────────────────────────────────────────
+    const sunData = getSunData(hour, weatherStore.season);
+    const targetSun = sunData.intensity * (weatherStore.state === 'rain' ? 0.2 :
+                                           weatherStore.state === 'cloudy' ? 0.55 :
+                                           weatherStore.state === 'cold' ? 0.6 : 1.0);
+    const targetAmbient = weatherStore.ambientIntensity *
+      (weatherStore.isNight ? 0.18 : 1.0);
+
     if (sunRef.current) {
-      sunRef.current.intensity += (weatherStore.sunIntensity - sunRef.current.intensity) * delta * 0.5;
+      sunRef.current.intensity += (targetSun - sunRef.current.intensity) * delta * 0.6;
+      // Sun arc: position changes with hour (rises east, sets west)
+      const angle = (hour - 6) / 12 * Math.PI; // 0 at 6AM, PI at 6PM
+      sunRef.current.position.set(
+        Math.cos(angle) * 120,
+        Math.sin(angle) * 100 + 5,
+        -20
+      );
+    }
+    if (ambientRef.current) {
+      const ambColor = weatherStore.isNight ? '#1a2040' :
+                       weatherStore.season === 'winter' ? '#c8d8f0' : '#e8d8c8';
+      _targetC.set(ambColor);
+      (ambientRef.current.color as THREE.Color).lerp(_targetC, delta * 0.4);
+      ambientRef.current.intensity += (targetAmbient - ambientRef.current.intensity) * delta * 0.6;
+    }
+    if (moonRef.current) {
+      moonRef.current.intensity += (sunData.moonIntensity - moonRef.current.intensity) * delta * 0.5;
+    }
+
+    // ── Fog ───────────────────────────────────────────────────────────────
+    if (scene.fog) {
+      const fog = scene.fog as THREE.Fog;
+      fog.near = weatherStore.fogNear;
+      fog.far  = weatherStore.fogFar;
+      const fogHex = weatherStore.state === 'rain' ? '#7090a0' :
+                     weatherStore.state === 'storm' ? '#506070' :
+                     weatherStore.state === 'cold' ? '#9098b0' :
+                     weatherStore.state === 'cloudy' ? '#a8c0d4' :
+                     weatherStore.isNight ? '#08101a' : '#c8e4f8';
+      fog.color.set(fogHex);
     }
   });
 
   return (
     <>
-      <ambientLight ref={ambientRef} color="#e8d8c8" intensity={1.8} />
+      {/* Upper sky dome — color driven by day/night */}
+      <mesh ref={upperDomeRef}>
+        <sphereGeometry args={[490, 16, 8]} />
+        <meshBasicMaterial color="#2a5fa8" side={THREE.BackSide} />
+      </mesh>
+      {/* Horizon gradient */}
+      <mesh ref={horizonRef} position={[0, -60, 0]}>
+        <sphereGeometry args={[488, 16, 6, 0, Math.PI * 2, 0, Math.PI * 0.38]} />
+        <meshBasicMaterial color="#87ceeb" side={THREE.BackSide} transparent opacity={0.85} />
+      </mesh>
+      {/* Horizon haze ring */}
+      <mesh ref={hazeRef} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[480, 30, 6, 32]} />
+        <meshBasicMaterial color="#c8e4f8" transparent opacity={0.35} />
+      </mesh>
+      {/* Moon — visible at night */}
+      <mesh position={[-80, 130, -200]}>
+        <sphereGeometry args={[6, 10, 8]} />
+        <meshBasicMaterial color="#e8eeff" />
+      </mesh>
+
+      {/* Lights */}
+      <ambientLight ref={ambientRef} color="#e8d8c8" intensity={2.0} />
       <directionalLight ref={sunRef} color="#fff8e0" intensity={4.2}
         position={[80, 100, -20]} castShadow={false} />
-      <hemisphereLight ref={hemiRef} args={['#87aad8', '#6a5a3a', 0.6]} />
+      <directionalLight ref={moonRef} color="#c8d8ff" intensity={0}
+        position={[-80, 120, 60]} castShadow={false} />
+      <hemisphereLight ref={hemiRef} args={['#87aad8', '#6a5a3a', 0.5]} />
     </>
   );
 }
@@ -764,25 +1322,8 @@ function WeatherController() {
 export function ChippewaWorld() {
   return (
     <>
-      {/* ── Daytime Sky Dome ── */}
-      {/* Upper sky — deep rich blue */}
-      <mesh>
-        <sphereGeometry args={[490, 16, 8]} />
-        <meshBasicMaterial color="#2a5fa8" side={THREE.BackSide} />
-      </mesh>
-      {/* Horizon gradient — lighter blue blends at the base */}
-      <mesh position={[0, -60, 0]}>
-        <sphereGeometry args={[488, 16, 6, 0, Math.PI * 2, 0, Math.PI * 0.38]} />
-        <meshBasicMaterial color="#87ceeb" side={THREE.BackSide} transparent opacity={0.85} />
-      </mesh>
-      {/* Horizon haze ring */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[480, 30, 6, 32]} />
-        <meshBasicMaterial color="#c8e4f8" transparent opacity={0.45} />
-      </mesh>
-
-      {/* ── Weather + Lighting (dynamic) ── */}
-      <WeatherController />
+      {/* ── Day/Night + Weather + Season (all-in-one) ── */}
+      <DayNightSystem />
 
       {/* ── Animated cloud layer ── */}
       <CloudLayer />
@@ -878,27 +1419,27 @@ export function ChippewaWorld() {
       <Puddle x={-42} z={-0.5} w={1.8} d={0.6} />
       <Puddle x={38}  z={2.5}  w={3.0} d={1.0} />
 
-      {/* ══ NORTH SIDE — Houses face south (rot=PI) ═════════════════════ */}
-      <ShotgunHouse x={-46} z={-19} rot={Math.PI} wallColor={HOUSE_CREAM}  trimColor={TRIM_GREEN}  hasLight hasChimney />
-      <ShotgunHouse x={-33} z={-19} rot={Math.PI} wallColor={HOUSE_YELLOW} trimColor={TRIM_WHITE}  hasLight />
-      <CreoleCottage x={-19} z={-22} rot={Math.PI} wallColor={HOUSE_MINT}   shutterColor={TRIM_GREEN}  roofColor="#141008" />
-      <ShotgunHouse x={-5}  z={-19} rot={Math.PI} wallColor={HOUSE_GRAY}   trimColor={TRIM_WHITE}  hasLight hasChimney />
-      <CreoleCottage x={9}   z={-22} rot={Math.PI} wallColor={HOUSE_CREAM}  shutterColor={TRIM_MAROON} roofColor="#181008" />
-      <ShotgunHouse x={23}  z={-19} rot={Math.PI} wallColor={HOUSE_PINK}   trimColor={TRIM_WHITE}  hasLight />
-      <ShotgunHouse x={36}  z={-19} rot={Math.PI} wallColor={HOUSE_SAGE}   trimColor={TRIM_GREEN}  hasLight hasChimney />
-      <CreoleCottage x={50}  z={-22} rot={Math.PI} wallColor={HOUSE_YELLOW} shutterColor={TRIM_GREEN}  roofColor="#141008" />
-      <ShotgunHouse x={-59} z={-19} rot={Math.PI} wallColor={HOUSE_CREAM}  trimColor={TRIM_GREEN}  hasLight />
+      {/* ══ NORTH SIDE — Luxury homes, front faces south (side='south') ══ */}
+      <LuxuryMansion x={-59} z={-19} side="south" wallColor={LUX_IVORY}  />
+      <LuxuryMansion x={-46} z={-19} side="south" wallColor={LUX_PEARL}  />
+      <GrandEstate   x={-19} z={-20} side="south" wallColor={BRICK_DEEP} />
+      <LuxuryMansion x={-33} z={-19} side="south" wallColor={MANOR_CREAM}/>
+      <LuxuryMansion x={-5}  z={-19} side="south" wallColor={LUX_SLATE}  />
+      <GrandEstate   x={9}   z={-20} side="south" wallColor={BRICK_MID}  />
+      <LuxuryMansion x={23}  z={-19} side="south" wallColor={LUX_IVORY}  />
+      <LuxuryMansion x={36}  z={-19} side="south" wallColor={LUX_PEARL}  />
+      <GrandEstate   x={50}  z={-20} side="south" wallColor={BRICK_DEEP} />
 
-      {/* ══ SOUTH SIDE — Houses face north (rot=0) ══════════════════════ */}
-      <ShotgunHouse x={-48} z={19}  wallColor={HOUSE_YELLOW} trimColor={TRIM_WHITE}  hasLight hasChimney />
-      <CreoleCottage x={-34} z={22}  wallColor={HOUSE_PINK}   shutterColor={TRIM_GREEN}  roofColor="#181008" />
-      <ShotgunHouse x={-20} z={19}  wallColor={HOUSE_MINT}   trimColor={TRIM_GREEN}  hasLight />
-      <ShotgunHouse x={-6}  z={19}  wallColor={HOUSE_CREAM}  trimColor={TRIM_MAROON} hasLight hasChimney />
-      <CreoleCottage x={8}   z={22}  wallColor={HOUSE_GRAY}   shutterColor="#4a6a5a"    roofColor="#141008" />
-      <ShotgunHouse x={22}  z={19}  wallColor={HOUSE_SAGE}   trimColor={TRIM_WHITE}  hasLight />
-      <ShotgunHouse x={35}  z={19}  wallColor={HOUSE_YELLOW} trimColor={TRIM_GREEN}  hasLight hasChimney />
-      <CreoleCottage x={49}  z={22}  wallColor={HOUSE_CREAM}  shutterColor={TRIM_MAROON} />
-      <ShotgunHouse x={-60} z={19}  wallColor={HOUSE_PINK}   trimColor={TRIM_WHITE} />
+      {/* ══ SOUTH SIDE — Luxury homes, front faces north (side='north') ══ */}
+      <LuxuryMansion x={-60} z={19}  side="north" wallColor={LUX_PEARL}  />
+      <LuxuryMansion x={-48} z={19}  side="north" wallColor={MANOR_CREAM}/>
+      <GrandEstate   x={-34} z={20}  side="north" wallColor={BRICK_MID}  />
+      <LuxuryMansion x={-20} z={19}  side="north" wallColor={LUX_IVORY}  />
+      <LuxuryMansion x={-6}  z={19}  side="north" wallColor={LUX_SLATE}  />
+      <GrandEstate   x={8}   z={20}  side="north" wallColor={BRICK_DEEP} />
+      <LuxuryMansion x={22}  z={19}  side="north" wallColor={LUX_IVORY}  />
+      <LuxuryMansion x={35}  z={19}  side="north" wallColor={LUX_PEARL}  />
+      <GrandEstate   x={49}  z={20}  side="north" wallColor={BRICK_MID}  />
 
       {/* ══ CORNER BARS ════════════════════════════════════════════════ */}
       <CornerBar x={-64} z={-25} rot={0}       name="CHIPPEWA TAVERN" />
@@ -1325,79 +1866,34 @@ export function ChippewaWorld() {
         </group>
       </group>
 
-      {/* ══ INVISIBLE BUILDING COLLIDERS ══════════════════════════════════════
-          Each collider covers the FULL visual footprint: body + porch/gallery.
-          ShotgunHouse: body z±1.92, porch extends +1.33 → total depth 5.25
-            rot=PI (north): porch faces world -z, center shifts to -19.67
-            rot=0  (south): porch faces world +z, center shifts to +19.67
-          CreoleCottage: body z±2.9, gallery extends +1.12 → total depth 7.02
-            rot=PI (north): center shifts to -22.56
-            rot=0  (south): center shifts to +22.56                         */}
-
-      {/* ── North side shotgun houses (rot=PI, porch faces -z) ── */}
-      {([-59,-46,-33,-5,23,36] as number[]).map(bx => (
-        <RigidBody key={`ns-${bx}`} type="fixed">
-          <mesh position={[bx, 2.25, -19.67]} visible={false}>
-            <boxGeometry args={[5.6, 4.5, 5.25]} />
-            <meshBasicMaterial />
-          </mesh>
-        </RigidBody>
-      ))}
-      {/* ── North side creole cottages (rot=PI, gallery faces -z) ── */}
-      {([-19, 9, 50] as number[]).map(bx => (
-        <RigidBody key={`nc-${bx}`} type="fixed">
-          <mesh position={[bx, 2.5, -22.56]} visible={false}>
-            <boxGeometry args={[6.4, 5.0, 7.02]} />
-            <meshBasicMaterial />
-          </mesh>
-        </RigidBody>
-      ))}
-
-      {/* ── South side shotgun houses (rot=0, porch faces +z) ── */}
-      {([-60,-48,-20,-6,22,35] as number[]).map(bx => (
-        <RigidBody key={`ss-${bx}`} type="fixed">
-          <mesh position={[bx, 2.25, 19.67]} visible={false}>
-            <boxGeometry args={[5.6, 4.5, 5.25]} />
-            <meshBasicMaterial />
-          </mesh>
-        </RigidBody>
-      ))}
-      {/* ── South side creole cottages (rot=0, gallery faces +z) ── */}
-      {([-34, 8, 49] as number[]).map(bx => (
-        <RigidBody key={`sc-${bx}`} type="fixed">
-          <mesh position={[bx, 2.5, 22.56]} visible={false}>
-            <boxGeometry args={[6.4, 5.0, 7.02]} />
-            <meshBasicMaterial />
-          </mesh>
-        </RigidBody>
-      ))}
+      {/* House colliders are now embedded inside LuxuryMansion / GrandEstate components */}
 
       {/* ── Expanded outer boundary walls (covers full city district) ── */}
       {/* West wall x=-220 */}
       <RigidBody type="fixed">
         <mesh position={[-220, 2.5, 0]} visible={false}>
-          <boxGeometry args={[0.4, 5, 500]} />
+          <boxGeometry args={[2.0, 5, 500]} />
           <meshBasicMaterial />
         </mesh>
       </RigidBody>
       {/* East wall x=+240 */}
       <RigidBody type="fixed">
         <mesh position={[240, 2.5, 0]} visible={false}>
-          <boxGeometry args={[0.4, 5, 500]} />
+          <boxGeometry args={[2.0, 5, 500]} />
           <meshBasicMaterial />
         </mesh>
       </RigidBody>
       {/* North wall z=-220 */}
       <RigidBody type="fixed">
         <mesh position={[20, 2.5, -220]} visible={false}>
-          <boxGeometry args={[500, 5, 0.4]} />
+          <boxGeometry args={[500, 5, 2.0]} />
           <meshBasicMaterial />
         </mesh>
       </RigidBody>
       {/* South wall z=+220 */}
       <RigidBody type="fixed">
         <mesh position={[20, 2.5, 220]} visible={false}>
-          <boxGeometry args={[500, 5, 0.4]} />
+          <boxGeometry args={[500, 5, 2.0]} />
           <meshBasicMaterial />
         </mesh>
       </RigidBody>

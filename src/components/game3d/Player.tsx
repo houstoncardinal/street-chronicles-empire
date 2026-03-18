@@ -438,8 +438,8 @@ export function Player({ state, dispatch }: PlayerProps) {
   const spawnPos: [number, number, number] = state.currentRegion === 'city' ? [0, 3, 10] : state.currentRegion === 'bayou' ? [0, 1, 10] : [0, 25, 10];
 
   return (
-    <RigidBody ref={rigidBody} position={spawnPos} lockRotations mass={1} linearDamping={0.5} enabledRotations={[false, false, false]}>
-      <CapsuleCollider args={[0.5, 0.3]} />
+    <RigidBody ref={rigidBody} position={spawnPos} lockRotations mass={1} linearDamping={0.5} enabledRotations={[false, false, false]} ccd>
+      <CapsuleCollider args={[0.5, 0.35]} />
     </RigidBody>
   );
 }

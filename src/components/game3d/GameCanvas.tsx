@@ -28,6 +28,8 @@ import { WorldModels } from './WorldModels';
 export function GameCanvas() {
   const { state, dispatch } = useGame();
   const [isLoading, setIsLoading] = useState(true);
+  const playerChar = CHARACTERS.find(c => c.id === state.playerCharacterId);
+  const skinColor = playerChar?.visual.skinColor ?? '#8B5E3C';
 
   // Seed enemy store on mount
   useEffect(() => {
@@ -91,7 +93,7 @@ export function GameCanvas() {
           </Physics>
 
           {/* First Person Weapon */}
-          <FirstPersonWeapon weaponId={state.equippedWeapon} />
+          <FirstPersonWeapon weaponId={state.equippedWeapon} skinColor={skinColor} />
 
           {/* Weapon effects — muzzle flash, bullet tracers, impact sparks */}
           <WeaponEffects />
